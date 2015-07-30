@@ -43,6 +43,8 @@ cd ..
 mkdir -p "NR_"$Combined
 cd $Combined
 perl ~/scripts/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$Combined.txt "NR_"$Combined
+
+#ls *.pdb | grep "_" | cut -f1 -d. ../>"NR_"$Combined".txt"
 cd ..
 
 }
@@ -109,7 +111,7 @@ function combineData
 
     cd "ALL_"$scheme
     perl ~/scripts/bin/getRedundantAntibodyClusters.pl;
-    mv *.txt ../$Redundant
+    mv *.txt ../../$Redundant
     cd ..
 }
 
@@ -154,6 +156,54 @@ scheme="Chothia"
 combineData $scheme
 scheme="Martin"
 combineData $scheme
+
+mkdir -p  NR_Merged_Antibody
+cp ./NR_AntibodyAntigen_Martin/* ./NR_Merged_Antibody
+cp ./NR_AntibodyHapten_Martin/* ./NR_Merged_Antibody
+cp ./NR_AntibodyFreeAntibody_Martin/* ./NR_Merged_Antibody
+cd ./NR_Merged_Antibody
+`ls *.pdb | grep "_" | cut -f1 -d. >../NR_Merged_Antibody.txt`
+cd ..
+
+mkdir -p NR_Merged_Light
+cp ./NR_LightAntigen_Martin/* ./NR_Merged_Light
+cp ./NR_LightHapten_Martin/* ./NR_Merged_Light
+cp ./NR_LightChain_Martin/* ./NR_Merged_Light
+
+cd ./NR_Merged_Light
+`ls *.pdb | grep "_" | cut -f1 -d. >../NR_Merged_Light.txt`
+cd ..
+
+
+mkdir -p NR_Merged_Heavy
+cp ./NR_HeavyAntigen_Martin/* ./NR_Merged_Heavy
+cp ./NR_HeavyHapten_Martin/* ./NR_Merged_Heavy
+cp ./NR_HeavyChain_Martin/* ./NR_Merged_Heavy
+
+cd ./NR_Merged_Heavy
+`ls *.pdb | grep "_" | cut -f1 -d. >../NR_Merged_Heavy.txt`
+cd ..
+
+cd ./NR_CombinedAb_Martin
+`ls *.pdb | grep "_" | cut -f1 -d. >../NR_Combined_Antibody.txt`
+cd ..
+
+cd ./NR_CombinedLg_Martin
+`ls *.pdb | grep "_" | cut -f1 -d. >../NR_Combined_Light.txt`
+cd ..
+
+cd ./NR_CombinedHv_Martin
+`ls *.pdb | grep "_" | cut -f1 -d. >../NR_Combined_Heavy.txt`
+cd ..
+
+# This shell command finds diffrence between Combined.txt and Merged.txt
+comm -13 <(sort NR_Combined_Antibody.txt) <(sort NR_Merged_Antibody.txt) >difference_Antibody.txt
+
+comm -13 <(sort NR_Combined_Light.txt) <(sort NR_Merged_Light.txt) >difference_Light.txt
+
+comm -13 <(sort NR_Combined_Heavy.txt) <(sort NR_Merged_Heavy.txt) >difference_Heavy.txt
+
+
 }
 
 function Split 
@@ -353,7 +403,7 @@ bash ~/allscript/bin/statsProcessed.sh $AntibodyAntigen $processed_proAntigenAB 
 
 bash ~/allscript/bin/statsUnprocessed.sh $fc $kabatFailed $cdrError $superseded >stats_unprocessed.tt
 
-exit;
+exit
 
 
 # This shell command finds diffrence between Combined.txt and Merged.txt

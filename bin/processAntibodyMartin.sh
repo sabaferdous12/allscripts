@@ -95,12 +95,29 @@ mv "NR_"* ./$data
 
 } # Function ends
 ##############################
+# This function puts together all the data (Complete Antibody, Light and
+# Heavy chains) for each numbering scheme
+function combineData
+{
+    scheme=$1;
+    Redundant="Redundant_files"
+
+    mkdir "ALL_"$scheme
+    cp ./"CombinedAb_"$scheme/* ./ALL_$scheme
+    cp ./"CombinedLg_"$scheme/* ./ALL_$scheme
+    cp ./"CombinedHv_"$scheme/* ./ALL_$scheme
+
+    cd "ALL_"$scheme
+    perl ~/scripts/bin/getRedundantAntibodyClusters.pl;
+    mv *.txt ../$Redundant
+    cd ..
+}
 
 function countFiles
 {
     dir=`pwd`
     data="Data"
-    
+    cd $data
 processed_proAntigenAB=`ls $dir/$data/AntibodyAntigen_Martin | wc -l`
 processed_antibody=`ls $dir/$data/FreeAntibody_Martin | wc -l`
 processed_haptenAB=`ls $dir/$data/AntibodyHapten_Martin | wc -l`
@@ -130,9 +147,14 @@ NR_CombinedHV=`ls $dir/$data/NR_CombinedHv_Martin | wc -l`
 
     
 echo "$processed_proAntigenAB,$processed_antibody,$processed_haptenAB,$processed_combinedAB,$NR_proAntigenAB,$NR_Antibody,$NR_HaptenAB,$NR_CombinedAB,$processed_proAntigenLG,$processed_light,$processed_haptenLG,$processed_combinedLG,$NR_proAntigenLG,$NR_light,$NR_HaptenLG,$NR_CombinedLG,$processed_proAntigenHV,$processed_heavy,$processed_haptenHV,$processed_combinedHV,$NR_proAntigenHV,$NR_heavy,$NR_HaptenHV,$NR_CombinedHV"
-                                                                
-}
 
+scheme="Kabat"
+combineData $scheme
+scheme="Chothia"
+combineData $scheme
+scheme="Martin"
+combineData $scheme
+}
 
 function Split 
 {
@@ -182,6 +204,11 @@ process $free $proAntigen $npAntigen $Combined
 
 }
 
+function get_rtrn(){
+        echo `echo $1|cut --delimiter=, -f $2`
+        }
+
+
 ############################################
 echo "Main program running";
 scheme="Kabat"
@@ -197,11 +224,6 @@ schemeFlag="-a"
 runProg $scheme $schemeFlag $1
 
 Result=$(countFiles)
-
-function get_rtrn(){
-    echo `echo $1|cut --delimiter=, -f $2`
-}
-
 
 processed_proAntigenAB=`get_rtrn $Result 1`
 processed_antibody=`get_rtrn $Result 2`
@@ -230,33 +252,6 @@ NR_heavy=`get_rtrn $Result 22`
 NR_HaptenHV=`get_rtrn $Result 23`
 NR_CombinedHV=`get_rtrn $Result 24`
 
-echo $processed_proAntigenAB
-echo $processed_antibody
-echo $processed_haptenAB
-echo $processed_combinedAB
-echo $NR_proAntigenAB
-echo $NR_Antibody
-echo $NR_HaptenAB
-echo $NR_CombinedAB
-
-echo $processed_proAntigenLG
-echo $processed_light
-echo $processed_haptenLG
-echo $processed_combinedLG
-echo $NR_proAntigenLG
-echo $NR_light
-echo $NR_HaptenLG
-echo $NR_CombinedLG
-
-echo $processed_proAntigenHV
-echo $processed_heavy
-echo $processed_haptenHV
-echo $processed_combinedHV
-echo $NR_proAntigenHV
-echo $NR_heavy
-echo $NR_HaptenHV
-echo $NR_CombinedHV
-
 
 log="Logs"
 mkdir -p $log
@@ -276,9 +271,7 @@ filearray=( * ) # Reading directory files into an array
 cd ..
 
 compress
-
-exit;
-
+cd ..
 # The following bit of code finds stats of processed PDBs from masterlog.log 
 cd $log
 pattern="AntibodyAntigen="
@@ -356,28 +349,12 @@ cd ..
 
 #cd ..
 
-bash ~/scripts/bin/statsProcessed.sh $AntibodyAntigen $processed_proAntigenAB $NR_proAntigenAB $ABhapten $processed_haptenAB $NR_HaptenAB $Freeantibody $processed_antibody $NR_Antibody $completeAntibodyDataset $processed_combinedAB $NR_CombinedAB $lightAntigen $processed_proAntigenLG $NR_proAntigenLG $LGhapten $processed_haptenLG $NR_HaptenLG $bensJones $processed_light $NR_light $completeLightDataset $processed_combinedLG $NR_CombinedHV $heavyAntigen $processed_proAntigenHV $NR_proAntigenHV $HVhapten $processed_haptenHV $NR_HaptenHV $camelids $processed_heavy $NR_heavy $completeHeavyDataset $processed_combinedHV $NR_CombinedHV >stats_processed.tt
+bash ~/allscript/bin/statsProcessed.sh $AntibodyAntigen $processed_proAntigenAB $NR_proAntigenAB $ABhapten $processed_haptenAB $NR_HaptenAB $Freeantibody $processed_antibody $NR_Antibody $completeAntibodyDataset $processed_combinedAB $NR_CombinedAB $lightAntigen $processed_proAntigenLG $NR_proAntigenLG $LGhapten $processed_haptenLG $NR_HaptenLG $bensJones $processed_light $NR_light $completeLightDataset $processed_combinedLG $NR_CombinedHV $heavyAntigen $processed_proAntigenHV $NR_proAntigenHV $HVhapten $processed_haptenHV $NR_HaptenHV $camelids $processed_heavy $NR_heavy $completeHeavyDataset $processed_combinedHV $NR_CombinedHV >stats_processed.tt
 
-bash ~/scripts/bin/statsUnprocessed.sh $fc $kabatFailed $cdrError $superseded >stats_unprocessed.tt
+bash ~/allscript/bin/statsUnprocessed.sh $fc $kabatFailed $cdrError $superseded >stats_unprocessed.tt
 
-cd $data
-mkdir -p NR_Martin_merged
-cd NR_Complex_Martin
-cp *.pdb ../NR_Martin_merged
-cd ..
+exit;
 
-cd NR_Antibody_Martin
-cp *.pdb ../NR_Martin_merged
-cd ..
-
-cd NR_Hapten_Martin
-cp *.pdb ../NR_Martin_merged
-cd ..
-
-# To copy the PDB codes from the directory  
-cd NR_Martin_merged
-ls | grep "_" | cut -f1 -d. > ../Merged.txt
-cd ..
 
 # This shell command finds diffrence between Combined.txt and Merged.txt
 comm -13 <(sort Combined.txt) <(sort Merged.txt) >difference.txt

@@ -203,6 +203,14 @@ comm -13 <(sort NR_Combined_Light.txt) <(sort NR_Merged_Light.txt) >difference_L
 
 comm -13 <(sort NR_Combined_Heavy.txt) <(sort NR_Merged_Heavy.txt) >difference_Heavy.txt
 
+# Create list of free antibody and complexed antibodies 
+perl ~/allscript/bin/FreeComplexedAntibody.pl -a ./difference_Antibody.txt ../Redundant_files/Redundant_CombinedAb_Martin.txt
+
+# Create list of free Bence-Jones and complexed Bence-jones
+perl ~/allscript/bin/FreeComplexedAntibody.pl -l ./difference_Light.txt ../Redundant_files/Redundant_CombinedLg_Martin.txt
+
+# Create list of free antibody and complexed antibodies
+perl ~/allscript/bin/FreeComplexedAntibody.pl -h ./difference_Heavy.txt ../Redundant_files/Redundant_CombinedHv_Martin.txt
 
 }
 
@@ -218,7 +226,8 @@ count=$(echo $String | cut -f2 -d=) # after =, the delimiter
 
 function compress
 {
-    for directory in  *
+    array=(*/)
+    for directory in  "${array[@]}"
     do
         dirname=$(basename "$directory")
         tar -jcvf $dirname.tar.bz2 $dirname
@@ -318,8 +327,8 @@ filearray=( * ) # Reading directory files into an array
  do
      sort $i -o $i
  done
-cd ..
-
+cd .. 
+mv *.txt ../$log 
 compress
 cd ..
 # The following bit of code finds stats of processed PDBs from masterlog.log 
@@ -405,14 +414,3 @@ bash ~/allscript/bin/statsUnprocessed.sh $fc $kabatFailed $cdrError $superseded 
 
 exit
 
-
-# This shell command finds diffrence between Combined.txt and Merged.txt
-comm -13 <(sort Combined.txt) <(sort Merged.txt) >difference.txt
-# This script produces list of antibody PDBs that are present in both forms  
-# i.e Free or Complexed 
-perl ~/scripts/bin/FreeComplexedAntibody.pl
-
-cd ..
-exit;
-
-# This shell script does not update the website...

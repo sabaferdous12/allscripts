@@ -43,8 +43,8 @@ open(my $EPITOPE_REGIONS, '>', "$dir/epitope_sequence-G$gap-CR$contacting_residu
     or die "File Can not open";
 open (my $NONANTIGEN, '>', "$dir/epitope_nonAntigenPDBs") or die "Can not open file $!";
 
-print {$STAT} "Antibody:Regions:Odd_Bits\n";
-print {$EPITOPE_REGIONS} "Antibody:Regions:Odd_Bits\n";
+print {$STAT} "Antibody:Regions:Fragments\n";
+print {$EPITOPE_REGIONS} "Antibody:Regions:Fragments\n";
 
 foreach my $pdb_file (@dir_files) 
 {

@@ -41,8 +41,9 @@ my @dir_files = readDirPDB($dir);
 open(my $STAT, '>', "$dir/epitope-stat-G$gap-CR$contacting_residues") or die "File can not open";
 open(my $EPITOPE_REGIONS, '>', "$dir/epitope_sequence-G$gap-CR$contacting_residues")
     or die "File Can not open";
+open (my $NONANTIGEN, '>', "$dir/epitope_nonAntigenPDBs") or die "Can not open file $!";
 
-print {$STAT} "Antibody:\tRegions:\tOdd_Bits\n";
+print {$STAT} "Antibody:Regions:Odd_Bits\n";
 print {$EPITOPE_REGIONS} "Antibody:Regions:Odd_Bits\n";
 
 foreach my $pdb_file (@dir_files) 
@@ -55,8 +56,10 @@ foreach my $pdb_file (@dir_files)
 
     
     if ( (!@{$light_cont_res_REFA}) or (!@{$heavy_cont_res_REFA}) ) {
-        print {$EPITOPE_REGIONS} "$pdb_file:Not Antigen\n";
-        print {$STAT} "$pdb_file:Not Antigen\n";
+#        print {$EPITOPE_REGIONS} "$pdb_file:Not Antigen\n";
+#        print {$STAT} "$pdb_file:Not Antigen\n";
+        print {$NONANTIGEN} "$pdb_file\n";
+        
         next;
     }
     

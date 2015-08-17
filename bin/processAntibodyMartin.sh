@@ -160,7 +160,7 @@ combineData $scheme
 mkdir -p  NR_Merged_Antibody
 cp ./NR_AntibodyAntigen_Martin/* ./NR_Merged_Antibody
 cp ./NR_AntibodyHapten_Martin/* ./NR_Merged_Antibody
-cp ./NR_AntibodyFreeAntibody_Martin/* ./NR_Merged_Antibody
+cp ./NR_FreeAntibody_Martin/* ./NR_Merged_Antibody
 cd ./NR_Merged_Antibody
 `ls *.pdb | grep "_" | cut -f1 -d. >../NR_Merged_Antibody.txt`
 cd ..
@@ -408,7 +408,7 @@ cd ..
 
 #cd ..
 
-bash ~/allscript/bin/statsProcessed.sh $AntibodyAntigen $processed_proAntigenAB $NR_proAntigenAB $ABhapten $processed_haptenAB $NR_HaptenAB $Freeantibody $processed_antibody $NR_Antibody $completeAntibodyDataset $processed_combinedAB $NR_CombinedAB $lightAntigen $processed_proAntigenLG $NR_proAntigenLG $LGhapten $processed_haptenLG $NR_HaptenLG $bensJones $processed_light $NR_light $completeLightDataset $processed_combinedLG $NR_CombinedHV $heavyAntigen $processed_proAntigenHV $NR_proAntigenHV $HVhapten $processed_haptenHV $NR_HaptenHV $camelids $processed_heavy $NR_heavy $completeHeavyDataset $processed_combinedHV $NR_CombinedHV >stats_processed.tt
+bash ~/allscript/bin/statsProcessed.sh $AntibodyAntigen $processed_proAntigenAB $NR_proAntigenAB $ABhapten $processed_haptenAB $NR_HaptenAB $Freeantibody $processed_antibody $NR_Antibody $completeAntibodyDataset $processed_combinedAB $NR_CombinedAB $lightAntigen $processed_proAntigenLG $NR_proAntigenLG $LGhapten $processed_haptenLG $NR_HaptenLG $bensJones $processed_light $NR_light $completeLightDataset $processed_combinedLG $NR_CombinedLG $heavyAntigen $processed_proAntigenHV $NR_proAntigenHV $HVhapten $processed_haptenHV $NR_HaptenHV $camelids $processed_heavy $NR_heavy $completeHeavyDataset $processed_combinedHV $NR_CombinedHV >stats_processed.tt
 
 bash ~/allscript/bin/statsUnprocessed.sh $fc $kabatFailed $cdrError $superseded >stats_unprocessed.tt
 

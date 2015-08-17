@@ -12,10 +12,12 @@ use general qw (readDirPDB);
 use epitope qw (getChainLabelAndType);
 use pdb qw (get_pdb_path);
 use SFPerlVars;
+use Cwd;
 
 # Give directory address where antigens needs to process
-my $dir = '/acrm/data/people/saba/data/dataNew/DataSJune2015/NR_Complex_Martin';
-#my $dir = '/home/bsm/ucbterd/Desktop/NR_Antibody_Martin'; 
+#my $dir = '/acrm/data/people/saba/data/dataNew/DataSJune2015/NR_Complex_Martin';
+my $dir = getcwd ();
+
 chdir $dir;
 
 my @dirFiles = readDirPDB($dir);
@@ -49,14 +51,12 @@ foreach my $pdbFile (@dirFiles)
     my $pdbatoms = $SFPerlVars::pdbatoms;
 #    my @antigenPDB = `pdbatoms $pdbPath | $pdbgetchain $antigenChainLabel $pdbPath`;
     my @antigenPDB = `pdbatoms $pdbPath | $pdbgetchain $antigenChainLabel`; 
- #   print "@antigenPDB\n";
-#exit; 
     
     if (!@antigenPDB)
-    {
-	$antigenChainLabel = "H";
-	my @antigenPDB = `pdbatoms $pdbPath | $pdbgetchain $antigenChainLabel`;
-    }
+        {
+            $antigenChainLabel = "H";
+            my @antigenPDB = `pdbatoms $pdbPath | $pdbgetchain $antigenChainLabel`;
+        }
 
     # Open Output file in append mode
     my $outFile = "pro^$pdbFile";
@@ -79,8 +79,8 @@ foreach my $pdbFile (@dirFiles)
 
     # Remove Old files 
     `rm $pdbFile`;
-  #  last; 
-
+    #  last; 
+    
 }
 
 # All the new files now have extension pro^:

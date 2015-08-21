@@ -3,7 +3,7 @@
 # and fragments in the 3D structure of an antigen by using pymol. It writes 
 # .pml (pymol script) with all the commands and then sends that pymol script to
 # program pymol. 
-
+# It also gives a text file with length of antigen chain
 use strict;
 #use warnings;
 use Data::Dumper;
@@ -18,15 +18,23 @@ my $aligned_pdb ;
 my ($antigen_chain_label, $antigen_chian_type);
 my (@rangeRegion, @residueFragment) = ();
 
-#my $dir = "/acrm/data/people/saba/data/dataNew/DataMay2015/NR_Complex_PDB";
 my $dir = getcwd();
 
 chdir $dir; 
 my $infile = "epitope_sequence-G3-CR3";
-my $AntigenLength = "AntigenLength";
 
-open (my $AG, '>', "./stats/$AntigenLength") or die
-    "Can not open file\n";
+open (my $AGPEP, '>', "./stats/peptideAntigenLength") or die
+    "Can Not Open File...\n";
+
+open (my $AGPRO, '>', "./stats/proteinAntigenLength") or die
+    "Can Not Open File\n";
+
+open (my $AGPP, '>', "./stats/peptideAntigenPDBs") or die
+    "Can Not Open File\n";
+
+open (my $AGPR, '>', "./stats/proteinAntigenPDBs") or die
+    "Can Not Open File\n";
+
 
 my @dirFiles = readDirPDB ($dir); 
 my $EPITOPE; 
@@ -75,7 +83,7 @@ foreach my $pdbFile (@dirFiles)
 	    split(" ", `$chaintype $pdb_file | head -1`);
 
         #### get Antigen length
-        getAntigenChainLength($pdb_file, $antigen_chain_label, $AG);
+        getAntigenChainLength($pdb_file, $antigen_chain_label, $AGPEP, $AGPRO, $AGPP, $AGPR);
                 
         # To align the antibody structure around a center
 	my $abalign = $SFPerlVars::abalign;
@@ -95,36 +103,8 @@ foreach my $pdbFile (@dirFiles)
 } # While Loop ends here
 
 # Directory Manipulation 
-
-if (-d "Figures")
-{
-  if (-d "$infile")
-  {
-    `mv *.png ./Figures/$infile`;
-  }
-  else 
-  {
-   mkdir "./Figures/$infile";
-   `mv *.png ./Figures/$infile`;
-  }
-
-}
-
-else
-{
-mkdir "Figures";
-if (-d "$infile")
-  {
-    `mv *.png ./Figures/$infile`;
-  }
-  else 
-  {
-   mkdir "./Figures/$infile";
-   `mv *.png ./Figures/$infile`;
-  }
-
-}
-
+`mkdir -p Figure`;
+`mv *.png ./Figure`;
 
 print scalar @antigen_DNA, " DNA Antigens are:  @antigen_DNA\n";
 print scalar @antigen_protein, " Protein Antigens are: @antigen_protein\n";
@@ -135,9 +115,17 @@ print scalar @antigen_protein, " Protein Antigens are: @antigen_protein\n";
 
 sub getAntigenChainLength
     {
-        my ($pdbFile, $antigenChain, $AG) = @_;
-        my @chianData = split (" ", `pdbgetchain $antigenChain $pdbFile | pdbcount`);
-        print {$AG} "$pdbFile: ", $chianData[3], "\n";
+        my ($pdbFile, $antigenChain, $AGPEP, $AGPRO) = @_;
+        my @chainData = split (" ", `pdbgetchain $antigenChain $pdbFile | pdbcount`);
+
+        if ( $chainData[3] < 30 ) {
+            print {$AGPEP} "$pdbFile: ", $chainData[3], "\n";
+            print {$AGPP} "$pdbFile\n";
+        }
+        else {
+            print {$AGPRO} "$pdbFile: ", $chainData[3], "\n";
+            print {$AGPR} "$pdbFile\n";
+        }
         
     }
     

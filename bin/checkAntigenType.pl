@@ -7,14 +7,16 @@
 
 use strict; 
 use warnings; 
-use pdb qw(read_dir); 
+use general qw(readDirPDB); 
 use SFPerlVars;
+use Cwd;
 
 # Read directory of Antibody-Antigen Complexes
-my $dir = "/acrm/data/people/saba/data/dataNew/DataMar2015/NR_Complex_Martin";
+# my $dir = "/acrm/data/people/saba/data/dataNew/DataMar2015/NR_Complex_Martin";
+my $dir = getcwd();
 
 chdir $dir; 
-my @dirFiles = read_dir($dir);
+my @dirFiles = readDirPDB($dir);
 
 # Open files for writing list of nonprotein and protein antigens
 open(my $PRO, '>', "ProteinAntigen.list") or 
@@ -24,7 +26,7 @@ open(my $NONPRO, '>', "nonProteinAntigen.list") or
     die ("Can not open file $!");
 #print "@dir_files\n"; 
 
-`mkdir nonProteinAntigen`;
+`mkdir -p nonProteinAntigen`;
  
 my (@nonProteinAntigen, @proteinAntigen);
 

@@ -10,14 +10,17 @@ use Data::Dumper;
 use SFPerlVars;
 use epitope qw(getRegionRange getFragmentResidue writepymolScript );
 use general qw (readDirPDB);
-
+use Cwd;
+ 
 my @antigen_DNA;
 my @antigen_protein;
 my $aligned_pdb ;
 my ($antigen_chain_label, $antigen_chian_type);
 my (@rangeRegion, @residueFragment) = ();
 
-my $dir = "/acrm/data/people/saba/data/dataNew/DataMay2015/NR_Complex_Martin";
+#my $dir = "/acrm/data/people/saba/data/dataNew/DataMay2015/NR_Complex_PDB";
+my $dir = getcwd();
+
 chdir $dir; 
 my $infile = "epitope_sequence-G3-CR3";
 my $AntigenLength = "AntigenLength";

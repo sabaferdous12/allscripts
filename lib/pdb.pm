@@ -1174,7 +1174,7 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 R-FREE     $resInfo{'R-Free'}\n";
             print $AG_AB_FILE "REMARK 950 CHAIN L    $L\n";
             print $AG_AB_FILE "REMARK 950 CHAIN H    $H\n";
-            print $AG_AB_FILE "REMARK 950 CHAIN $Ag    $Ag\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag\n";
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -s $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -m $pdb_path`;
@@ -1201,7 +1201,7 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 R-FACTOR   $resInfo{'R-Factor'}\n";
             print $AG_AB_FILE "REMARK 950 R-FREE     $resInfo{'R-Free'}\n";
             print $AG_AB_FILE "REMARK 950 CHAIN L    $L\n";
-            print $AG_AB_FILE "REMARK 950 CHAIN $Ag    $Ag\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag\n";
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -s $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -m $pdb_path`;
@@ -1226,7 +1226,7 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 R-FACTOR   $resInfo{'R-Factor'}\n";
             print $AG_AB_FILE "REMARK 950 R-FREE     $resInfo{'R-Free'}\n";
             print $AG_AB_FILE "REMARK 950 CHAIN H    $H\n";
-            print $AG_AB_FILE "REMARK 950 CHAIN $Ag    $Ag\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag\n";
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -s $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -m $pdb_path`;

@@ -110,7 +110,7 @@ load $alignedPdb
 bg_color white                                                
 turn x, 90                                                    
 turn y, 90                                                    
-turn x, 90                                                    
+Turn x, 90                                                    
 turn y, 90                                                    
 show cartoon                                                  
 hide lines                                                    

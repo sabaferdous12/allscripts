@@ -2,7 +2,7 @@ use strict;
 use warnings; 
 use Data::Dumper; 
 
-use lib("~/scripts/lib");
+use lib("~/allscript/lib");
 use epitope qw(getRegionRange); 
 
 open (my $IN, "epitope_sequence-G3-CR3") or die $!; 

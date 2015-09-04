@@ -857,17 +857,30 @@ sub SecondaryStrAssignmentToPeptides
 	die "Can not open file $!";
     
     # Xmas files parser to parse secondary structure assignments
-    my $xmastoss = $SFPerlVars::xmastoss;
-    my $pdbFilePath = "/acrm/data/xmas/pdb/pdb";
-    $ext = ".xmas";
+#    my $xmastoss = $SFPerlVars::xmastoss;
+ #   my $pdbFilePath = "/acrm/data/xmas/pdb/pdb";
+ #   $ext = ".xmas";
+  #  ($pdbID, $ext1) = split('_',  $pdbFile);
+  #  $pdbFile = $pdbFilePath.lc($pdbID).$ext;
+  #  $antigenChainLabel = uc($antigenChainLabel);
+
+    my $pdbFilePath = "/acrm/data/pdb/pdb";
+    
+    $ext = ".ent"; 
+    
     ($pdbID, $ext1) = split('_',  $pdbFile);
     $pdbFile = $pdbFilePath.lc($pdbID).$ext;
     $antigenChainLabel = uc($antigenChainLabel);
+
+    
     
     # Parse Secondary structure assignments of only Antigen chain
-    my @antigen =
-	`$xmastoss $pdbFile | grep $antigenChainLabel` ;
-    
+#   my @antigen =
+#	`$xmastoss $pdbFile | grep $antigenChainLabel` ;
+
+    my @antigen = `pdbsecstr $pdbFile | grep $antigenChainLabel`;
+
+      
     my ($insection, $endsection) = 0; 
     # Obtain SS assignments of the given range of epitope
     foreach my $line (@antigen)
@@ -1478,7 +1491,7 @@ sub getPercentAlpha
         elsif ($ssElem =~ /(\s+)E|e(\s?)/) {
             $betaCount++;
         }
-        elsif ( $ssElem =~ /(\s+)C|c(\s?)/) {
+        elsif ( $ssElem =~ /(\s+)C|c|-(\s?)/) {
             $coilCount++;
         }
     }

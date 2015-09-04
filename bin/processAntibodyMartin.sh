@@ -27,22 +27,22 @@ function makeNRdata
 {
 mkdir -p "NR_"$proAntigen
 cd $proAntigen  # runs perl program for non-redundant data   
-perl ~/scripts/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$proAntigen".txt" "NR_"$proAntigen
+perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$proAntigen".txt" "NR_"$proAntigen
 cd ..
 
 mkdir -p "NR_"$free
 cd $free
-perl ~/scripts/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$free".txt" "NR_"$free
+perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$free".txt" "NR_"$free
 cd ..
 
 mkdir -p "NR_"$npAntigen
 cd $npAntigen
-perl ~/scripts/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$npAntigen".txt" "NR_"$npAntigen
+perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$npAntigen".txt" "NR_"$npAntigen
 cd ..
 
 mkdir -p "NR_"$Combined
 cd $Combined
-perl ~/scripts/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$Combined.txt "NR_"$Combined
+perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$Combined.txt "NR_"$Combined
 
 #ls *.pdb | grep "_" | cut -f1 -d. ../>"NR_"$Combined".txt"
 cd ..
@@ -66,22 +66,22 @@ cp ./$proAntigen/* ./$Combined
 cp ./$npAntigen/* ./$Combined
 
 cd $free
-perl ~/scripts/bin/getRedundantAntibodyClusters.pl;
+perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
 mv *.txt ../$Redundant
 cd ..
 
 cd $npAntigen
-perl ~/scripts/bin/getRedundantAntibodyClusters.pl; 
+perl ~/allscript/bin/getRedundantAntibodyClusters.pl; 
 mv *.txt ../$Redundant
 cd ..
 
 cd $proAntigen
-perl ~/scripts/bin/getRedundantAntibodyClusters.pl;
+perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
 mv *.txt ../$Redundant
 cd ..
 
 cd $Combined
-perl ~/scripts/bin/getRedundantAntibodyClusters.pl;
+perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
 mv *.txt ../$Redundant
 cd ..
 
@@ -110,7 +110,7 @@ function combineData
     cp ./"CombinedHv_"$scheme/* ./ALL_$scheme
 
     cd "ALL_"$scheme
-    perl ~/scripts/bin/getRedundantAntibodyClusters.pl;
+    perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
     mv *.txt ../../$Redundant
     cd ..
 }
@@ -246,7 +246,7 @@ free="FreeAntibody_"$scheme
 proAntigen="AntibodyAntigen_"$scheme
 npAntigen="AntibodyHapten_"$scheme
 Combined="CombinedAb_"$scheme
-perl ~/scripts/bin/processAntibodyPDBs.pl $schemeFlag $3
+perl ~/allscript/bin/processAntibodyPDBs.pl $schemeFlag $3
 process $free $proAntigen $npAntigen $Combined
 
 free="LightChain_"$scheme
@@ -273,6 +273,7 @@ echo "Main program running";
 scheme="Kabat"
 schemeFlag="-k"
 runProg $scheme $schemeFlag $1
+exit; 
 
 scheme="Chothia"
 schemeFlag="-c"

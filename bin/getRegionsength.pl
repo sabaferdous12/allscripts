@@ -5,7 +5,7 @@ use Data::Dumper;
 use lib("~/allscript/lib");
 use epitope qw(getRegionRange); 
 
-open (my $IN, "epitope_sequence-G3-CR3") or die $!; 
+open (my $IN, "./stats/epitope_sequence-G3-CR3") or die $!; 
 open (my $OUTR, ">RegionLengthTEST") or die "Can not open file";
 open (my $OUTF, ">FragmentLengthTEST")or die "Can not open file";
 

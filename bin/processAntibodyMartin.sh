@@ -273,7 +273,6 @@ echo "Main program running";
 scheme="Kabat"
 schemeFlag="-k"
 runProg $scheme $schemeFlag $1
-exit; 
 
 scheme="Chothia"
 schemeFlag="-c"

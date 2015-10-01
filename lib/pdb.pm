@@ -730,6 +730,7 @@ sub antigen_CDR_conts
                         }
                 }
         }
+    
     else {
         $n =0;
         $nonAgCount = 1;

@@ -165,8 +165,8 @@ sub processAntibodyAntigen
     get_antibody_antigen_complex ( $pdb_id, $destABAG, $destAB, $chainsHashRef, $numbering,
                                    $file_path, %complex_hash );
     print {$LOG} "$pdb_id file complexes has been written seperatley\n";
-    return $nonAgCount;
-    
+
+    return $nonAgCount;   
 }
 
 # ************ movePDBs **************                            

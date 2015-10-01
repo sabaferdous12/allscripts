@@ -202,7 +202,10 @@ sub check_chain
 	}
 
     }
-    
+    if ( ( !$light) and (!$heavy) and (!$antigen) )
+        {
+            return 
+    }
     return ($light, $heavy, $antigen);
 
 }
@@ -632,7 +635,8 @@ sub assemble_CDR_antigen
     my $dir = '.';
     my ( $AG_FILE, $CDR_FILE, $AG_CDR_FILE, $cdr_ag_conts );
     my %return_hash = ();
-        
+    my $nonAgCount;
+    
     foreach my $antibdy ( @$ab_pair )
     {
 	my $cdrs = $antibdy."_CDR.pdb";
@@ -664,16 +668,19 @@ sub assemble_CDR_antigen
 	    
 	    my $ag_cdr_filename = "$ch"."_"."$cdrs";
 # To calculate the contacts of antigen with CDRs of antibody
-	    my $cdr_ag_cont = antigen_CDR_conts ( $ag_cdr_filename, $ch );
+            my $cdr_ag_cont;
+            
+	     ($cdr_ag_cont, $nonAgCount ) = antigen_CDR_conts ( $ag_cdr_filename, $ch );
 	    $return_hash{$antibdy}->{$ch} = $cdr_ag_cont;
 	    
 	}
 	
     }
+    
     close ($AG_FILE);
     close ($CDR_FILE);
     close ($AG_CDR_FILE);  
-    return (%return_hash); 
+    return ($nonAgCount, %return_hash); 
     
 }
 
@@ -691,25 +698,43 @@ sub antigen_CDR_conts
 {
 
     my ($pdb_file, $antigen_chain ) = @_;
-    my $chaincontacts =
-	"$SFPerlVars::chaincontacts -r 4.00 -x LH -y $antigen_chain";
-    my @cdr_conts = `$chaincontacts $pdb_file`;
-    splice @cdr_conts, 0, 8;
-    my $n = 0;
-    foreach my $line ( @cdr_conts )
-    {
-        chomp ($line);
-	
-	if ( $line =~ /^Chain*/ )
-	{
-	    my @conts = split /:/, $line;
-	    $n += $conts[5];
-	    chomp($n);
-	    
-	}
+    my $Lchaincontacts =
+	"$SFPerlVars::chaincontacts -r 4.00 -x L -y $antigen_chain";
+    my @Lcdr_conts = `$Lchaincontacts $pdb_file`;
+
+  my $Hchaincontacts =
+      "$SFPerlVars::chaincontacts -r 4.00 -x H -y $antigen_chain";
+    my @Hcdr_conts = `$Hchaincontacts $pdb_file`;
+    my $n;
+    my $nonAgCount = 0;
+        
+    splice @Lcdr_conts, 0, 8;
+    splice @Hcdr_conts, 0, 8;
+    # if any of antibody chain (L or H) doesn't have contacts with CDRs
+    # Then do not compute contacts with antigen
+    if ( (@Lcdr_conts) and (@Hcdr_conts) )
+        {
+            $n = 0;
+            my @cdr_conts = (@Lcdr_conts, @Hcdr_conts);
+            
+            foreach my $line ( @cdr_conts )
+                {
+                    chomp ($line);
+                    
+                    if ( $line =~ /^Chain*/ )
+                        {
+                            my @conts = split /:/, $line;
+                            $n += $conts[5];
+                            chomp($n);
+                            
+                        }
+                }
+        }
+    else {
+        $n =0;
+        $nonAgCount = 1;
     }
-    
-    return $n;
+    return ($n, $nonAgCount);
     
 }
 

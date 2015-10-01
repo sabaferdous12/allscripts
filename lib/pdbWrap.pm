@@ -147,7 +147,7 @@ sub processAntibodyAntigen
     # Assembles file containing antibody CRD regions with antigen pdb file
     # Writes them into a separate file (CDR defination + antigen)
     # Computes contacts of CDR regions with each antigen
-    my (%CDR_hash_ref) = assemble_CDR_antigen($hash_keysRef, $antigen_ID);
+    my ($nonAgCount, %CDR_hash_ref) = assemble_CDR_antigen($hash_keysRef, $antigen_ID);
     print {$SUMMARY} "Anonymous Hash containg contact information of each".
 	"antibody with every antigen" .
 	Dumper (\%CDR_hash_ref);
@@ -165,6 +165,8 @@ sub processAntibodyAntigen
     get_antibody_antigen_complex ( $pdb_id, $destABAG, $destAB, $chainsHashRef, $numbering,
                                    $file_path, %complex_hash );
     print {$LOG} "$pdb_id file complexes has been written seperatley\n";
+    return $nonAgCount;
+    
 }
 
 # ************ movePDBs **************                            

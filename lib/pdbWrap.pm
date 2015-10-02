@@ -43,6 +43,7 @@ use pdb qw
      getchainIDs
      getChainTypeWithChainIDs
      getSingleChainAntibodyAntigenComplex
+     checkHashforIdenticalvalues
 );
 
 our @EXPORT_OK = qw 
@@ -52,7 +53,7 @@ our @EXPORT_OK = qw
      movePDBs
      processSingleChainAntibody
      processSingleChainAntibodyAntigen
-);
+   );
 
 # ************ dirOperations **************                              
 # Description: Prepares the directory for PDB processing
@@ -147,7 +148,7 @@ sub processAntibodyAntigen
     # Assembles file containing antibody CRD regions with antigen pdb file
     # Writes them into a separate file (CDR defination + antigen)
     # Computes contacts of CDR regions with each antigen
-    my ($nonAgCount, %CDR_hash_ref) = assemble_CDR_antigen($hash_keysRef, $antigen_ID);
+    my %CDR_hash_ref = assemble_CDR_antigen($hash_keysRef, $antigen_ID);
     print {$SUMMARY} "Anonymous Hash containg contact information of each".
 	"antibody with every antigen" .
 	Dumper (\%CDR_hash_ref);
@@ -157,16 +158,26 @@ sub processAntibodyAntigen
     my %complex_hash = get_complex(%CDR_hash_ref);
     print {$SUMMARY} "Hash containg Final complex information\n" .
 	Dumper (\%complex_hash);
+
+    # Check if all the antibodes have non antigen proteins. In such cases,
+    # hash value for antibody pair will be "NULL"
+    my $nonAgFlag =  checkHashforIdenticalvalues (%complex_hash);
+    if ( $nonAgFlag ) {
+        print {$SUMMARY} "All the antibodies are bound to non antigen protein\n";
+    }
+
     
     # Forming final complex, antibody (Light and Heavy) with corresponding 
     # antigen and writing individual complexes in a separate file. Like,
     # 1AFV having 2 complexes will be named as 1AFV_1 and 1AFV_2
+
+
     
     get_antibody_antigen_complex ( $pdb_id, $destABAG, $destAB, $chainsHashRef, $numbering,
                                    $file_path, %complex_hash );
     print {$LOG} "$pdb_id file complexes has been written seperatley\n";
 
-    return $nonAgCount;   
+    return $nonAgFlag;   
 }
 
 # ************ movePDBs **************                            

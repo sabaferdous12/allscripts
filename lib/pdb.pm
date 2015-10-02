@@ -59,6 +59,7 @@ our @EXPORT_OK = qw (
     getSingleChainAntibodyAntigenComplex
     getResolInfo
     getsingleChainAntibody
+    checkHashforIdenticalvalues
                    );
 
 #use pdbWrap qw (movePDBs);
@@ -670,7 +671,7 @@ sub assemble_CDR_antigen
 # To calculate the contacts of antigen with CDRs of antibody
             my $cdr_ag_cont;
             
-	     ($cdr_ag_cont, $nonAgCount ) = antigen_CDR_conts ( $ag_cdr_filename, $ch );
+	     $cdr_ag_cont = antigen_CDR_conts ( $ag_cdr_filename, $ch );
 	    $return_hash{$antibdy}->{$ch} = $cdr_ag_cont;
 	    
 	}
@@ -680,7 +681,7 @@ sub assemble_CDR_antigen
     close ($AG_FILE);
     close ($CDR_FILE);
     close ($AG_CDR_FILE);  
-    return ($nonAgCount, %return_hash); 
+    return  %return_hash; 
     
 }
 
@@ -706,7 +707,6 @@ sub antigen_CDR_conts
       "$SFPerlVars::chaincontacts -r 4.00 -x H -y $antigen_chain";
     my @Hcdr_conts = `$Hchaincontacts $pdb_file`;
     my $n;
-    my $nonAgCount = 0;
         
     splice @Lcdr_conts, 0, 8;
     splice @Hcdr_conts, 0, 8;
@@ -733,9 +733,9 @@ sub antigen_CDR_conts
     
     else {
         $n =0;
-        $nonAgCount = 1;
     }
-    return ($n, $nonAgCount);
+
+    return $n;
     
 }
 
@@ -759,6 +759,7 @@ sub get_complex
 	my %antigen_chains = %{ $cdr_ag_contact_hash{$ab_pair} };
 	
 	my($largest_k, $largest_v) = largest_value_hash(\%antigen_chains);
+
 	if ( $largest_v > 0 )
 	{
 	    $complex_hash{$ab_pair} = $largest_k;
@@ -772,6 +773,38 @@ sub get_complex
     return %complex_hash;
 }
 
+# ************* checkHashforIdenticalvalues *****************                
+# Description: This subroutine checks if all the values of hash are "NULL"
+#              If yes then returns 1 otherwise zero
+# Inputs: A hash
+# Outputs: Flag of 0 or 1
+# Subroutine call/Testing: my $nonAgFlag =  checkHashforIdenticalvalues
+#                                            (%complex_hash);
+# Date: 01 Oct 2015
+# Author: Saba  
+sub checkHashforIdenticalvalues
+    {
+        my %antibodyNonAg = @_;
+        my $hashSize = keys %antibodyNonAg;
+        my $countNonAg = 0;
+        my $nonAgFlag = 0;
+
+        foreach my $ab (keys %antibodyNonAg ) {
+            if ( $antibodyNonAg{$ab} eq "NULL") {
+                $countNonAg++;
+            }
+        }
+        
+        if ( $countNonAg == $hashSize) {
+            $nonAgFlag = 1;
+        }
+        else 
+            {
+                $nonAgFlag = 0;
+            }
+            return $nonAgFlag;
+
+        }
 # ************* get_antibody_antigen_complex *****************                
 # Description: Assembles the antibody with corresponding antigen based on 
 #              information in complex_hash 

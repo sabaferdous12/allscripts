@@ -706,30 +706,28 @@ sub antigen_CDR_conts
   my $Hchaincontacts =
       "$SFPerlVars::chaincontacts -r 4.00 -x H -y $antigen_chain";
     my @Hcdr_conts = `$Hchaincontacts $pdb_file`;
-    my $n;
-        
+    my $n;            
     splice @Lcdr_conts, 0, 8;
     splice @Hcdr_conts, 0, 8;
     # if any of antibody chain (L or H) doesn't have contacts with CDRs
     # Then do not compute contacts with antigen
     if ( (@Lcdr_conts) and (@Hcdr_conts) )
         {
-            $n = 0;
             my @cdr_conts = (@Lcdr_conts, @Hcdr_conts);
-            
-            foreach my $line ( @cdr_conts )
-                {
-                    chomp ($line);
-                    
-                    if ( $line =~ /^Chain*/ )
-                        {
-                            my @conts = split /:/, $line;
-                            $n += $conts[5];
-                            chomp($n);
-                            
-                        }
-                }
+            $n = countCDRContacts (@cdr_conts);
         }
+
+    elsif ( (@Lcdr_conts) or (@Hcdr_conts) ) {
+        my @cdr_conts = (@Lcdr_conts, @Hcdr_conts);
+        $n = countCDRContacts (@cdr_conts);
+
+        if ( $n > 15 ) {
+            $n = $n;
+        }
+        else {
+            $n = 0;
+        }
+    }
     
     else {
         $n =0;
@@ -739,6 +737,25 @@ sub antigen_CDR_conts
     
 }
 
+sub countCDRContacts
+    {
+        my (@cdr_conts) = @_;
+        my $n = 0;            
+        foreach my $line ( @cdr_conts )
+            {
+                chomp ($line);
+                    
+                if ( $line =~ /^Chain*/ )
+                    {
+                        my @conts = split /:/, $line;
+                        $n += $conts[5];
+                        chomp($n);
+                        
+                    }
+            }
+        return $n;
+    }
+    
 # ************* antigen_CDR_cont *****************                            
 # Description: Computes hash of antibody and antigen complex on basis of 
 #              highest number of contacts

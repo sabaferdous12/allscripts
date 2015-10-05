@@ -270,16 +270,17 @@ function get_rtrn(){
 
 ############################################
 echo "Main program running";
+
+scheme="Martin"
+schemeFlag="-a"
+runProg $scheme $schemeFlag $1
+exit; 
 scheme="Kabat"
 schemeFlag="-k"
 runProg $scheme $schemeFlag $1
 
 scheme="Chothia"
 schemeFlag="-c"
-runProg $scheme $schemeFlag $1
-
-scheme="Martin"
-schemeFlag="-a"
 runProg $scheme $schemeFlag $1
 
 Result=$(countFiles)

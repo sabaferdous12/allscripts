@@ -709,6 +709,7 @@ sub antigen_CDR_conts
     my $n;            
     splice @Lcdr_conts, 0, 8;
     splice @Hcdr_conts, 0, 8;
+        
     # if any of antibody chain (L or H) doesn't have contacts with CDRs
     # Then do not compute contacts with antigen
     if ( (@Lcdr_conts) and (@Hcdr_conts) )
@@ -716,12 +717,11 @@ sub antigen_CDR_conts
             my @cdr_conts = (@Lcdr_conts, @Hcdr_conts);
             $n = countCDRContacts (@cdr_conts);
         }
-
     elsif ( (@Lcdr_conts) or (@Hcdr_conts) ) {
         my @cdr_conts = (@Lcdr_conts, @Hcdr_conts);
         $n = countCDRContacts (@cdr_conts);
-
-        if ( $n > 15 ) {
+            
+        if ( $n >= 50 ) {
             $n = $n;
         }
         else {
@@ -729,10 +729,11 @@ sub antigen_CDR_conts
         }
     }
     
+    
     else {
         $n =0;
     }
-
+    
     return $n;
     
 }
@@ -744,7 +745,7 @@ sub countCDRContacts
         foreach my $line ( @cdr_conts )
             {
                 chomp ($line);
-                    
+                
                 if ( $line =~ /^Chain*/ )
                     {
                         my @conts = split /:/, $line;
@@ -770,23 +771,37 @@ sub get_complex
 {
     my ( %cdr_ag_contact_hash ) = @_;
     my %complex_hash;
-
+       
     foreach my $ab_pair (keys %cdr_ag_contact_hash)
     {
-	my %antigen_chains = %{ $cdr_ag_contact_hash{$ab_pair} };
-	
-	my($largest_k, $largest_v) = largest_value_hash(\%antigen_chains);
 
-	if ( $largest_v > 0 )
-	{
-	    $complex_hash{$ab_pair} = $largest_k;
-   	}
-	else
-	{
-	    $complex_hash{$ab_pair} ="NULL"; 
-	}
+            my %antigen_chains = %{ $cdr_ag_contact_hash{$ab_pair} };
+	
+            # Get highest value from hash and corrrespoding key 
+            my $Largest_v =  ((sort {$a <=> $b} values %antigen_chains)[-1]);
+            my $Largest_k = ((sort { $antigen_chains{$b} <=> $antigen_chains{$a} } keys %antigen_chains)[0]);
+            
+            # Get second highest value from hash and corrrespoding key 
+            my $secLargest_v =  ((sort {$a <=> $b} values %antigen_chains)[-2]);
+            my $secLargest_k = ((sort { $antigen_chains{$b} <=> $antigen_chains{$a} } keys %antigen_chains)[1]);
+            
+            # To check if second highest value is non-zero
+            if ( $secLargest_v > 0 ) {
+                $complex_hash{$ab_pair} = [$Largest_k, $secLargest_k];
+            }
+            
+            elsif ( ( $Largest_v > 0 ) and ($secLargest_v == 0 ) ) 
+                {
+                    $complex_hash{$ab_pair} = [$Largest_k];
+                }
+            else
+                {
+                    $complex_hash{$ab_pair} ="NULL"; 
+                }
+
     }
     
+
     return %complex_hash;
 }
 
@@ -838,6 +853,7 @@ sub get_antibody_antigen_complex
          $pdb_path, %complex_hash) = @_;
     my $dir = '.';
     my $count = 1;
+    my $biAntigen = 0;
     my %chainsHash = %{$chainsHashRef};
     my %mapedChains;
     
@@ -845,24 +861,28 @@ sub get_antibody_antigen_complex
 
    $count =  make_antibody_complex(\@antibodychains, \$pdb_id, "", $count,
                                    $numbering, $pdb_path, $chainsHashRef);
+      
     movePDBs ($dir, $destAB, $pdb_id);
+    my @antigen;
     
     foreach my $ab_pair( keys %complex_hash )
     {
 ######
         my $antibody = $ab_pair."_num.pdb"; 
-	my $antigen;
+	 my $antigenRef;
         
 	next if ( $complex_hash{ $ab_pair } eq  "NULL" );
 
         if ( $complex_hash{ $ab_pair } ne  "NULL" )
 	{
-	    $antigen = $complex_hash{$ab_pair}.".pdb";
+	    $antigenRef = $complex_hash{$ab_pair};
+            @antigen = @{$antigenRef};
 	} 
-
+          
 #####
         my ($L, $H) = split ("", $ab_pair);
-        my $Ag = $complex_hash{$ab_pair};
+
+#        my $Ag = $complex_hash{$ab_pair};
         
         my @LightChains = @{$chainsHash{"Light"}};
         my @HeavyChains = @{$chainsHash{"Heavy"}};
@@ -879,46 +899,70 @@ sub get_antibody_antigen_complex
         elsif ( grep (/$H/, @HeavyChains) ) {
             $mapedChains{H} = $H;
         }
-        if ( grep (/$Ag/, @AntigenChains)) {
-            $mapedChains{A} = $Ag;
+       # if ( grep (/$Ag/, @AntigenChains)) {
+        #    $mapedChains{A} = $Ag;
+        #}
+
+
+        open ( my $AB_FILE, '<', "$dir/$antibody" ) or
+            die "Could not open file $antibody";
+        
+        open ( my $AG_AB_FILE, '>>',"$pdb_id"."_"."$count".".pdb" ) or
+            die "Can not write complex";
+
+                
+        my @Ag;
+        
+        foreach my $agChain( @antigen) {
+            if ( grep (/$agChain/, @antigen)) {
+                push (@Ag, $agChain);
+            }
         }
+        $mapedChains{A} = [@Ag];   
+        printHeader($AG_AB_FILE, $numbering, $pdb_path, %mapedChains);    
+
+        foreach my $agChain(@antigen) {
+            
+        $agChain = $agChain.".pdb";
+           
+        
 ######
+	open ( my $AG_FILE , '<', "$dir/$agChain" ) or
+	    die "Could no open file $agChain";
+            
+            while ( !eof ( $AG_FILE ))
+                {
+                    my $file1 = <$AG_FILE>;
+                    # To ignore the Footer of PDB
+                    next if ($file1 =~ /^MASTER|^END/);
+                    print $AG_AB_FILE $file1;
+                }
+    }
         
-	open ( my $AG_FILE, '<', "$dir/$antigen" ) or
-	    die "Could no open file $antigen";
-	open ( my $AB_FILE, '<', "$dir/$antibody" ) or 
-	    die "Could not open file $antibody";
-	open ( my $AG_AB_FILE, '>>',"$pdb_id"."_"."$count".".pdb" ) or
-	    die "Can not write complex";
 
-        printHeader($AG_AB_FILE, $numbering, $pdb_path, %mapedChains);
-        
-        while ( !eof ( $AG_FILE ) ) 
-	{
-	    my $file1 = <$AG_FILE>;
-	    # To ignore the Footer of PDB
-	    next if ($file1 =~ /^MASTER|^END/);
-	    print $AG_AB_FILE $file1;
-	    
-	}
-
+    
 	while (!eof ( $AB_FILE ) )
 	{
-	    my $file2 = <$AB_FILE>;
-	    print $AG_AB_FILE $file2;
+	    my $file3 = <$AB_FILE>;
+	    print $AG_AB_FILE $file3;
             movePDBs ($dir, $destABAG, $pdb_id);
             
 	}
+                
         movePDBs ($dir, $destABAG, $pdb_id);
         $count++;
-#        print "TEST222: ", Dumper (\%mapedChains);
         %mapedChains = ();
         
     }
-
-    return $count;
+    
+    if ( (scalar @antigen) == 2 ) {
+        $biAntigen = 1;
+    }
+    
+    return $biAntigen;
        
 }
+
 
 
 # ************* make_antibody_complex *****************                
@@ -971,7 +1015,8 @@ sub make_antibody_complex
         elsif ( grep (/$H/, @HeavyChains) ) {
             $mapedChains{H} = $H;
         }
-
+        $mapedChains{A} = [];
+        
         printHeader($ABOUT_FILE, $numbering, $pdb_path, %mapedChains);
 	while (!eof ( $ABIN_FILE ) )
 	{
@@ -1145,17 +1190,16 @@ sub getSingleChainAntibodyAntigenComplex{
     foreach my $abChain ( keys %complex_hash )
     {
 	my $antibodyChain = $abChain."_num.pdb"; 
-	my $antigen;
+	my ($antigenRef, @antigen);
         
         next if ( $complex_hash{ $abChain } eq  "NULL" );
                    
         if ( $complex_hash{ $abChain } ne  "NULL" )
 	{
-	    $antigen = $complex_hash{$abChain}.".pdb";
-	} 
+	    $antigenRef = $complex_hash{$abChain};
+            @antigen = @{$antigenRef};
+        } 
 
-	open ( my $AG_FILE, '<', "$dir/$antigen" ) or
-	    die "Could no open file $antigen";
 	open ( my $AB_FILE, '<', "$dir/$antibodyChain" ) or 
 	    die "Could not open file $antibodyChain";
 	open ( my $AG_AB_FILE, '>>',"$pdb_id"."_"."$count".".pdb" ) or
@@ -1164,6 +1208,7 @@ sub getSingleChainAntibodyAntigenComplex{
         my @LightChains = @{$chainsHash{"Light"}};
         my @HeavyChains = @{$chainsHash{"Heavy"}};
         my @AntigenChains = @{$chainsHash{"Antigen"}};
+
         my $Ag = $complex_hash{$abChain};
         
         if ( grep (/$abChain/, @LightChains) ){
@@ -1172,19 +1217,35 @@ sub getSingleChainAntibodyAntigenComplex{
         elsif ( grep (/$abChain/, @HeavyChains)) {
             $mapedChains{H} = $abChain;
         }
-        if ( grep (/$Ag/, @AntigenChains)) {
-            $mapedChains{A} = $Ag;
+#        if ( grep (/$Ag/, @AntigenChains)) {
+ #           $mapedChains{A} = $Ag;
+  #      }
+        
+        my @Ag;
+        foreach my $agChain( @antigen) {
+            if ( grep (/$agChain/, @antigen)) {
+                push (@Ag, $agChain);
+            }
+        }
+        $mapedChains{A} = [@Ag];
+        printHeader($AG_AB_FILE, $numbering, $pdb_path, %mapedChains);
+        
+        foreach  my $agChain(@antigen) {
+            
+            $agChain = $agChain.".pdb";
+            open ( my $AG_FILE, '<', "$dir/$agChain" ) or
+                die "Could no open file $agChain";
+            
+            while ( !eof ( $AG_FILE ) ) 
+                {
+                    my $file1 = <$AG_FILE>;
+                    # To ignore the Footer of PDB
+                    next if ($file1 =~ /^MASTER|^END/);
+                    print $AG_AB_FILE $file1;
+                }
+            
         }
         
-        
-        printHeader($AG_AB_FILE, $numbering, $pdb_path, %mapedChains);    
-        while ( !eof ( $AG_FILE ) ) 
-	{
-	    my $file1 = <$AG_FILE>;
-	    # To ignore the Footer of PDB
-	    next if ($file1 =~ /^MASTER|^END/);
-	    print $AG_AB_FILE $file1;
-        }
 
 	while (!eof ( $AB_FILE ) )
 	{
@@ -1226,8 +1287,22 @@ sub printHeader
     my %resInfo = getResolInfo($pdb_path);
     my $L = $mapedChains{L};
     my $H = $mapedChains{H};
-    my $Ag = $mapedChains{A};
-    if ( ( !$Ag) and ($L) and ($H) )
+    my $AgRef = $mapedChains{A};
+    
+    my @Ag = @{$AgRef};
+    my $size = scalar @Ag;
+    my ($Ag1, $Ag2);
+    
+    if ( $size == 1) {
+        $Ag1 = $Ag[0];
+        $Ag2 = 0;
+    }
+    elsif ($size > 1) {
+        $Ag1 = $Ag[0];
+        $Ag2 = $Ag[1];
+    }
+    
+    if ( ( !$Ag1) and (!$Ag2) and ($L) and ($H) )
         {
             print $AG_AB_FILE "REMARK 950 NUMBERING  $numbering\n";
             print $AG_AB_FILE "REMARK 950 METHOD     $resInfo{Type}\n";
@@ -1241,7 +1316,7 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -s $pdb_path`;
         }
-    elsif ( ($L) and ($H) and ($Ag))
+    elsif ( ($L) and ($H) and ($Ag1) and (!$Ag2))
         {
             print $AG_AB_FILE "REMARK 950 NUMBERING  $numbering\n";
             print $AG_AB_FILE "REMARK 950 METHOD     $resInfo{Type}\n";
@@ -1250,15 +1325,39 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 R-FREE     $resInfo{'R-Free'}\n";
             print $AG_AB_FILE "REMARK 950 CHAIN L    $L\n";
             print $AG_AB_FILE "REMARK 950 CHAIN H    $H\n";
-            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag1\n";
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -s $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -s $pdb_path`;
-            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -m $pdb_path`;
-            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -s $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -m $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -s $pdb_path`;
         }
-    elsif ( ($L) and (!$Ag) )
+    elsif ( ($L) and ($H) and ($Ag1) and ($Ag2))
+        {
+            print $AG_AB_FILE "REMARK 950 NUMBERING  $numbering\n";
+            print $AG_AB_FILE "REMARK 950 METHOD     $resInfo{Type}\n";
+            print $AG_AB_FILE "REMARK 950 RESOLUTION $resInfo{Resolution}\n";
+            print $AG_AB_FILE "REMARK 950 R-FACTOR   $resInfo{'R-Factor'}\n";
+            print $AG_AB_FILE "REMARK 950 R-FREE     $resInfo{'R-Free'}\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN L    $L\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN H    $H\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag1\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag2\n";
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -m $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -s $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -m $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -s $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -m $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -s $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag2 -m $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag2 -s $pdb_path`;
+            
+    }
+
+
+    
+    elsif ( ($L) and (!$Ag1) )
         {
             print $AG_AB_FILE "REMARK 950 NUMBERING  $numbering\n";
             print $AG_AB_FILE "REMARK 950 METHOD     $resInfo{Type}\n";
@@ -1269,7 +1368,7 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -s $pdb_path`;
         }
-    elsif ( ($L) and ($Ag) )
+    elsif ( ($L) and ($Ag1) )
         {
             print $AG_AB_FILE "REMARK 950 NUMBERING  $numbering\n";
             print $AG_AB_FILE "REMARK 950 METHOD     $resInfo{Type}\n";
@@ -1277,13 +1376,13 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 R-FACTOR   $resInfo{'R-Factor'}\n";
             print $AG_AB_FILE "REMARK 950 R-FREE     $resInfo{'R-Free'}\n";
             print $AG_AB_FILE "REMARK 950 CHAIN L    $L\n";
-            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag1\n";
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $L -s $pdb_path`;
-            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -m $pdb_path`;
-            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -s $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -m $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -s $pdb_path`;
         }
-    elsif ( ($H) and (!$Ag))
+    elsif ( ($H) and (!$Ag1))
         {
         print $AG_AB_FILE "REMARK 950 NUMBERING  $numbering\n";
         print $AG_AB_FILE "REMARK 950 METHOD     $resInfo{Type}\n";
@@ -1294,7 +1393,7 @@ sub printHeader
         print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -m $pdb_path`;
         print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -s $pdb_path`;
     }
-    elsif ( ($H) and ($Ag))
+    elsif ( ($H) and ($Ag1))
         {
             print $AG_AB_FILE "REMARK 950 NUMBERING  $numbering\n";
             print $AG_AB_FILE "REMARK 950 METHOD     $resInfo{Type}\n";
@@ -1302,11 +1401,11 @@ sub printHeader
             print $AG_AB_FILE "REMARK 950 R-FACTOR   $resInfo{'R-Factor'}\n";
             print $AG_AB_FILE "REMARK 950 R-FREE     $resInfo{'R-Free'}\n";
             print $AG_AB_FILE "REMARK 950 CHAIN H    $H\n";
-            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag\n";
+            print $AG_AB_FILE "REMARK 950 CHAIN A    $Ag1\n";
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -m $pdb_path`;
             print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $H -s $pdb_path`;
-            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -m $pdb_path`;
-            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag -s $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -m $pdb_path`;
+            print $AG_AB_FILE "REMARK 950 ", `pdbheader -c $Ag1 -s $pdb_path`;
         }
 
 }
@@ -1344,7 +1443,7 @@ sub getsingleChainAntibody
         elsif ( grep (/$antibody/, @HeavyChains)) {
             $mapedChains{H} = $antibody;
         }
-        
+        $mapedChains{A} =[];        
 
         printHeader($ABOUT_FILE, $numbering, $pdb_path, %mapedChains);
 	while (!eof ( $ABIN_FILE ) )

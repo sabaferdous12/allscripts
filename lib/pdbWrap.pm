@@ -163,7 +163,8 @@ sub processAntibodyAntigen
     # hash value for antibody pair will be "NULL"
     my $nonAgFlag =  checkHashforIdenticalvalues (%complex_hash);
     if ( $nonAgFlag ) {
-        print {$SUMMARY} "All the antibodies are bound to non antigen protein\n";
+        print {$SUMMARY} "Antibody is bound to non antigen protein.\nThis has been ".
+            "calculated if antigen in bound to one of the antibody chains\n";
     }
 
     
@@ -173,11 +174,11 @@ sub processAntibodyAntigen
 
 
     
-    get_antibody_antigen_complex ( $pdb_id, $destABAG, $destAB, $chainsHashRef, $numbering,
+    my $biAntigen = get_antibody_antigen_complex ( $pdb_id, $destABAG, $destAB, $chainsHashRef, $numbering,
                                    $file_path, %complex_hash );
     print {$LOG} "$pdb_id file complexes has been written seperatley\n";
 
-    return $nonAgFlag;   
+    return ($nonAgFlag, $biAntigen);   
 }
 
 # ************ movePDBs **************                            

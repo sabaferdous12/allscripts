@@ -822,7 +822,7 @@ sub get_complex
 # Author: Saba  
 sub checkHashforIdenticalvalues
     {
-        my %antibodyNonAg = @_;
+        my (%antibodyNonAg) = @_;
         my $hashSize = keys %antibodyNonAg;
         my $countNonAg = 0;
         my $nonAgFlag = 0;

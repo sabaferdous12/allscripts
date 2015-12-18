@@ -66,22 +66,22 @@ cp ./$proAntigen/* ./$Combined
 cp ./$npAntigen/* ./$Combined
 
 cd $free
-perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
+perl ~/allscript/bin/getRedundantClustersAntibody.pl
 mv *.txt ../$Redundant
 cd ..
 
 cd $npAntigen
-perl ~/allscript/bin/getRedundantAntibodyClusters.pl; 
+perl ~/allscript/bin/getRedundantClustersAntibody.pl
 mv *.txt ../$Redundant
 cd ..
 
 cd $proAntigen
-perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
+perl ~/allscript/bin/getRedundantClustersAntibody.pl
 mv *.txt ../$Redundant
 cd ..
 
 cd $Combined
-perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
+perl ~/allscript/bin/getRedundantClustersAntibody.pl
 mv *.txt ../$Redundant
 cd ..
 
@@ -242,23 +242,23 @@ scheme=$1
 schemeFlag=$2
 # Running get_antibody_complex program for 3 numbering schemes
 echo "get_antibody_complex program is running for $scheme numbering";
-free="FreeAntibody_"$scheme
-proAntigen="AntibodyAntigen_"$scheme
-npAntigen="AntibodyHapten_"$scheme
-Combined="CombinedAb_"$scheme
+free="LH_Free_"$scheme
+proAntigen="LH_Protein_"$scheme
+npAntigen="LH_NonProtein_"$scheme
+Combined="LH_Combined_"$scheme
 perl ~/allscript/bin/processAntibodyPDBs.pl $schemeFlag $3
 process $free $proAntigen $npAntigen $Combined
 
-free="LightChain_"$scheme
-proAntigen="LightAntigen_"$scheme
-npAntigen="LightHapten_"$scheme
-Combined="CombinedLg_"$scheme
+free="L_Free_"$scheme
+proAntigen="L_Protein_"$scheme
+npAntigen="L_NonProtein_"$scheme
+Combined="L_Combined_"$scheme
 process $free $proAntigen $npAntigen $Combined
 
-free="HeavyChain_"$scheme
-proAntigen="HeavyAntigen_"$scheme
-npAntigen="HeavyHapten_"$scheme
-Combined="CombinedHv_"$scheme
+free="H_Free_"$scheme
+proAntigen="H_Protein_"$scheme
+npAntigen="H_NonProtein_"$scheme
+Combined="H_Combined_"$scheme
 process $free $proAntigen $npAntigen $Combined
 
 }

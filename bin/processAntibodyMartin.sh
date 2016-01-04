@@ -26,23 +26,27 @@
 function makeNRdata
 {
 mkdir -p "NR_"$proAntigen
-cd $proAntigen  # runs perl program for non-redundant data   
-perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$proAntigen".txt" "NR_"$proAntigen
+cd $proAntigen  # runs perl program for non-redundant data
+perl ~/allscript/bin/prepareNRAbData.pl ../$Redundant/"Redundant_"$proAntigen".txt" "NR_"$proAntigen
+echo "Preparing Non-Redundant Data\n";
 cd ..
 
 mkdir -p "NR_"$free
 cd $free
-perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$free".txt" "NR_"$free
+perl ~/allscript/bin/prepareNRAbData.pl ../$Redundant/"Redundant_"$free".txt" "NR_"$free
+echo "Preparing Non-Redundant Data\n";
 cd ..
 
 mkdir -p "NR_"$npAntigen
 cd $npAntigen
-perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$npAntigen".txt" "NR_"$npAntigen
+perl ~/allscript/bin/prepareNRAbData.pl ../$Redundant/"Redundant_"$npAntigen".txt" "NR_"$npAntigen
+echo "Preparing Non-Redundant Data\n";
 cd ..
 
 mkdir -p "NR_"$Combined
 cd $Combined
-perl ~/allscript/bin/constructNonRedundantData.pl ../$Redundant/"Redundant_"$Combined.txt "NR_"$Combined
+perl ~/allscript/bin/prepareNRAbData.pl ../$Redundant/"Redundant_"$Combined.txt "NR_"$Combined
+echo "Preparing Non-Redundant Data\n";
 
 #ls *.pdb | grep "_" | cut -f1 -d. ../>"NR_"$Combined".txt"
 cd ..
@@ -67,21 +71,25 @@ cp ./$npAntigen/* ./$Combined
 
 cd $free
 perl ~/allscript/bin/getRedundantClustersAntibody.pl
+echo "Calculating Redundant Clusters for $free\n";
 mv *.txt ../$Redundant
 cd ..
 
 cd $npAntigen
 perl ~/allscript/bin/getRedundantClustersAntibody.pl
+echo "Calculating Redundant Clusters for $npAntigen\n";
 mv *.txt ../$Redundant
 cd ..
 
 cd $proAntigen
 perl ~/allscript/bin/getRedundantClustersAntibody.pl
+echo "Calculating Redundant Clusters for $proAntigen\n";
 mv *.txt ../$Redundant
 cd ..
 
 cd $Combined
 perl ~/allscript/bin/getRedundantClustersAntibody.pl
+echo "Calculating Redundant Clusters for $Combined\n";
 mv *.txt ../$Redundant
 cd ..
 
@@ -105,12 +113,12 @@ function combineData
     Redundant="Redundant_files"
 
     mkdir "ALL_"$scheme
-    cp ./"CombinedAb_"$scheme/* ./ALL_$scheme
-    cp ./"CombinedLg_"$scheme/* ./ALL_$scheme
-    cp ./"CombinedHv_"$scheme/* ./ALL_$scheme
+    cp ./"LH_Combined_"$scheme/* ./ALL_$scheme
+    cp ./"L_Combined_"$scheme/* ./ALL_$scheme
+    cp ./"H_Combined_"$scheme/* ./ALL_$scheme
 
     cd "ALL_"$scheme
-    perl ~/allscript/bin/getRedundantAntibodyClusters.pl;
+    perl ~/allscript/bin/getRedundantClustersAntibody.pl
     mv *.txt ../../$Redundant
     cd ..
 }
@@ -274,7 +282,8 @@ echo "Main program running";
 scheme="Martin"
 schemeFlag="-a"
 runProg $scheme $schemeFlag $1
-exit; 
+exit;
+
 scheme="Kabat"
 schemeFlag="-k"
 runProg $scheme $schemeFlag $1

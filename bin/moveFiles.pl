@@ -23,7 +23,7 @@ foreach my $nr_file (@nr_files){
     }
 
     else{
-	print $nr_file;
+	print $nr_file, "\n";
     }
 
 }

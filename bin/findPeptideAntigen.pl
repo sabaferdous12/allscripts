@@ -8,7 +8,7 @@
 #   Date:       04.01.16
 #   Function:   Identification of PDB files with peptide antigens
 #
-#   Copyright:  (c) Dr. Saba Ferdous, UCL, 2015
+#   Copyright:  (c) Saba Ferdous, UCL, 2015
 #   Author:     Saba Ferdous
 #   Address:    Institute of Structural and Molecular Biology
 #               Division of Biosciences
@@ -36,7 +36,9 @@
 use strict; 
 use warnings;
 use List::MoreUtils qw(uniq);
-use general qw (readDirPDB); 
+use general qw (readDirPDB);
+use antigenProcessing qw (getAntigenChains);
+
 use SFPerlVars;
 use Cwd;
 
@@ -66,33 +68,6 @@ foreach my $pdbFile (@dirFiles)
 }
 print join ("\n", @PDBFiles );
 
-sub getAntigenChains
-{
-    my ($pdbFile) = @_;
-    
-    my (@antigenChainsTemp, @antigenChains, @antigens) ;
-    # Grep all antigen chain in PDB file
-     @antigenChainsTemp = `grep "CHAIN A" $pdbFile`;
-
-    # For multiple antigens in PDB file
-    if ( (scalar @antigenChainsTemp) > 1  )
-    {
-        foreach my $ag ( @antigenChainsTemp )
-        {
-            chomp $ag;
-            @antigens = split(m/\s+/, $ag);
-            push (@antigenChains, $antigens[5]);
-        }
-        
-    }
-    # For Single antigen 
-    else {
-        @antigens = map {split(" ", $_)} @antigenChainsTemp;
-        push (@antigenChains, $antigens[5]);
-    } 
-    
-    return @antigenChains;
-}    
     
 #*************************************************************************
 # UsageDie()

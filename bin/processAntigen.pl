@@ -8,7 +8,8 @@
 
 use strict; 
 use warnings;
-use general qw (readDirPDB); 
+use general qw (readDirPDB);
+use antigenProcessing qw (getAntigenChains);
 use epitope qw (getChainLabelAndType);
 use pdb qw (get_pdb_path);
 use SFPerlVars;
@@ -61,6 +62,7 @@ foreach my $pdbFile (@dirFiles)
     # Open Output file in append mode
     my $outFile = "pro^$pdbFile";
     open (my $OUT, ">>$outFile") or
+
 	die ("Can not open\n");
     
     # Write Antigen atom and HETATM records on new file 

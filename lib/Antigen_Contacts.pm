@@ -4,6 +4,7 @@ use 5.010001;
 use strict;
 #use warnings;
 use SFPerlVars;
+use antigenProcessing qw (getAntigenChains);
 
 require Exporter;
 
@@ -28,9 +29,30 @@ our $VERSION = '0.01';
 sub antibody_antigen_contacts{
     my ($pdb_file) = @_;
     my $chaincontacts = $SFPerlVars::chaincontacts;
-    my $antigen = get_antigen_chain_id($pdb_file);
-    my @chain_conts = `$chaincontacts -r 4.00 -x LH -y $antigen $pdb_file`;
-    splice @chain_conts, 0, 8; 
+    #my $antigen = get_antigen_chain_id($pdb_file);
+    my (@chain_conts, @temp) ;
+    
+    my @antigenChains = getAntigenChains($pdb_file);
+    foreach my $ag (@antigenChains ) {
+        if ( $ag eq "L" or $ag eq "H") {
+            $ag = "1";
+        }
+        
+            print "TEST: $ag\n";
+        
+        chomp $ag;
+        @chain_conts = `$chaincontacts -r 4.00 -x LH -y $ag $pdb_file`;
+        splice @chain_conts, 0, 8;
+        push (@temp, @chain_conts);
+        
+        #last;
+        
+    }
+    
+    
+    print "TEST: @temp\n";
+    exit;
+    
     return @chain_conts;
 }
 
@@ -106,8 +128,8 @@ my    @chain_conts = antibody_antigen_contacts($pdb_file);
 # Date: 02 April 2014                                   
 # Author: Saba 
 
-sub antigen_cont_residue{
-  #  my (@chain_conts) = @_;
+sub antigen_cont_residue
+{
     my ($pdb_file) = @_;
     my    @chain_conts = antibody_antigen_contacts($pdb_file);
   

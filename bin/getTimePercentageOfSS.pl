@@ -1,4 +1,4 @@
-#!/usr/bin/perl -s
+#!/usr/bin/perl
 #*************************************************************************
 #
 #   Program:    getTimePercentageOfSS
@@ -39,9 +39,23 @@
 #*************************************************************************
 
 use strict;
-#use warnings;
+use warnings;
 use Data::Dumper;
-UsageDie() if(defined($::h));
+use Getopt::Long qw(GetOptions);
+
+my $stepSize;
+my $simuLength;
+my $inputFile;
+
+GetOptions
+    (
+    "n=i" => \$stepSize,
+    "l=i" => \$simuLength,
+    "f=s" => \$inputFile,
+) or UsageDie();
+
+open (my $IN, '<', $inputFile);
+
 
 my %resHash;
 my $count = 1;
@@ -50,7 +64,7 @@ my $count = 1;
 # strand = (E, B)
 # helix = (H, G, I)
 
-while (my $line=<>) # Reads file from STDIN
+while (my $line=<$IN>) # Reads file from STDIN
 {
     chomp($line);
     if ( $line =~ m/^"\S*"/) # Reads line starting with " and non space
@@ -65,7 +79,7 @@ while (my $line=<>) # Reads file from STDIN
                      ( $start eq "S") )
            {
                $startType = "coil";
-               $cper = getSScount ($startType, $line);
+               $cper = getSScount ($startType, $line, $stepSize, $simuLength);
                # A hash storing first frame SS and its
                # percentage over the whole trajectory
                $resHash{$count.$start} = $cper;
@@ -74,7 +88,7 @@ while (my $line=<>) # Reads file from STDIN
         elsif ( ( $start eq "E") or ( $start eq "B") )
             {
                 $startType = "strand";
-                $sper = getSScount ($startType, $line);
+                $sper = getSScount ($startType, $line, $stepSize, $simuLength);
                 $resHash{$count.$start} = $sper;
                 
             }
@@ -83,7 +97,7 @@ while (my $line=<>) # Reads file from STDIN
                     ($start eq "I") )
             {
                 $startType = "helix";
-                $aper = getSScount ($startType, $line);
+                $aper = getSScount ($startType, $line, $stepSize, $simuLength);
                 $resHash{$count.$start} = $aper;
             }
         $count++;           
@@ -104,7 +118,7 @@ print "Average time for peptide to stay closer to start conformation = $avgTime\
 # *************************************************************
 sub getSScount
 {
-    my ($start, $simulationSS) = @_;
+    my ($start, $simulationSS, $stepSize, $simuLength) = @_;
     my ($coilCount, $strandCount, $alphaCount ) =
         (0, 0, 0);
     my ($cper, $aper, $sper);
@@ -119,7 +133,8 @@ sub getSScount
                   }
           } @ss;
         # dssp saved frame every 10 ps and its 1000 ns in total
-        $cper = (($coilCount*10)/1000000) * 100;
+        # $stepSize = 10ps, $simuLength = 1000000ps
+        $cper = (($coilCount*$stepSize)/$simuLength) * 100;
         $cper = sprintf "%.2f", $cper;
         return $cper;
     }
@@ -130,7 +145,7 @@ sub getSScount
                      $strandCount++;
                  }
          } @ss;
-        $sper = (($strandCount*10)/1000000) *100;
+        $sper = (($strandCount*$stepSize)/$simuLength) *100;
         $sper = sprintf "%.2f", $sper;
         return $sper;
     }
@@ -141,7 +156,7 @@ sub getSScount
                      $alphaCount++;
                  }
          } @ss;
-        $aper = (($alphaCount*10)/1000000) *100;
+        $aper = (($alphaCount*$stepSize)/$simuLength) *100;
         $aper = sprintf "%.2f", $aper;
         return $aper;
     }
@@ -161,7 +176,8 @@ sub UsageDie
 
 
 getTimePercentageOfSS V1.0 (c) 2015, UCL, Saba Ferdous
-Usage:  getTimePercentageOfSS.pl <dsspOutputFile.xpm>
+Usage:  getTimePercentageOfSS.pl -n <step size in ps> -l <simulation length in ps>
+        -f <dsspOutputFile.xpm>
 
 Finds the pecentage of time a residue stays in a parti-
 cular SS conformation and returns average over the whole

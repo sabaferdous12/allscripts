@@ -24,33 +24,32 @@
 #
 #*************************************************************************
 #
-#   This program is not in the public domain, but it may be copied
-#   according to the conditions laid out in the accompanying file
-#   COPYING.DOC
-#
-#   The code may be modified as required, but any modifications must be
+#   This program is not in the public domain but he code may be modified
+#   as required, but any modifications must be
 #   documented so that the person responsible can be identified. If
 #   someone else breaks this code, I don't want to be blamed for code
 #   that does not work!
 #
-#   The code may not be sold commercially or included as part of a
-#   commercial product except as described in the file COPYING.DOC.
 #
 #*************************************************************************
 
 use strict;
-use warnings;
+#use warnings;
 use Data::Dumper;
 use Getopt::Long qw(GetOptions);
 
 my $stepSize;
 my $simuLength;
 my $inputFile;
+my $start;
+my $pepLength;
 
 GetOptions
     (
     "n=i" => \$stepSize,
-    "l=i" => \$simuLength,
+    "ls=i" => \$simuLength,
+    "s=i" => \$start,
+    "lp=i" => \$pepLength,
     "f=s" => \$inputFile,
 ) or UsageDie();
 
@@ -60,23 +59,27 @@ open (my $IN, '<', $inputFile);
 my %resHash;
 my $count = 1;
 
-# coil = (~, C, T, S)
-# strand = (E, B)
-# helix = (H, G, I)
+# coil = (~, -,  C, c,  T, t,  S, s)
+# strand = (E, e, B, b)
+# helix = (H,h, G, g, I, i)
 
 while (my $line=<$IN>) # Reads file from STDIN
 {
+
+    
     chomp($line);
-    if ( $line =~ m/^"\S*"/) # Reads line starting with " and non space
+    if ( $line =~ m/^"\S*"/ ) # Reads line starting with " and non space
     {
         my ($cper, $aper, $sper, $startType);
 
-        my $start = substr ($line, 1, 1); # Takes SS from first frame
+        my $start = substr ($line, 1 , 1); # Takes SS from first frame
+
         # Checks the type of first frame's SS
         # checks for coil
-        if ( ( $start eq "") or ( $start eq "~") or 
-                 ( $start eq "C") or ( $start eq "T") or
-                     ( $start eq "S") )
+        if ( ( $start eq "") or ( $start eq "~") or ( $start eq "-") or 
+                 ( $start eq "C") or ( $start eq "c") or
+                     ( $start eq "S") or ( $start eq "s" ) or
+                         ( $start eq "T") or ( $start eq "t" ) )
            {
                $startType = "coil";
                $cper = getSScount ($startType, $line, $stepSize, $simuLength);
@@ -85,7 +88,8 @@ while (my $line=<$IN>) # Reads file from STDIN
                $resHash{$count.$start} = $cper;
            }
         # checks for strand
-        elsif ( ( $start eq "E") or ( $start eq "B") )
+        elsif ( ( $start eq "E") or ( $start eq "e") or
+                    ( $start eq "B") or ( $start eq "b") )
             {
                 $startType = "strand";
                 $sper = getSScount ($startType, $line, $stepSize, $simuLength);
@@ -93,8 +97,9 @@ while (my $line=<$IN>) # Reads file from STDIN
                 
             }
         # checks for helix
-        elsif ( ( $start eq "H") or ( $start eq "G") or
-                    ($start eq "I") )
+        elsif ( ( $start eq "H") or ( $start eq "h") or
+                    ($start eq "G") or ( $start eq "g") or
+                        ($start eq "I") or ( $start eq "i") )
             {
                 $startType = "helix";
                 $aper = getSScount ($startType, $line, $stepSize, $simuLength);
@@ -106,12 +111,28 @@ while (my $line=<$IN>) # Reads file from STDIN
 
 my ($sum, $countAA) = ( 0, 0);
 # printing and average
+my @perVal;
+my @perKey;
+
 foreach my $key ( sort {$a <=> $b} keys %resHash)
     {
-        $sum = $sum + $resHash{$key};  
-        print "$key: $resHash{$key}\n";
-        $countAA++;
+        push (@perVal, $resHash{$key} );
+        push (@perKey, $key );
+        
+       # $sum = $sum + $resHash{$key};  
+  #      print "$key: $resHash{$key}\n";
+#        $countAA++;
     }
+
+my $startLoop = $start-1;
+my $endLoop = $pepLength + $startLoop;
+
+for ( my $i = $startLoop; $i < $endLoop; $i++) {
+    $sum = $sum + $perVal[$i];
+    $countAA++;   
+    print "$perKey[$i]: $perVal[$i]\n";
+}
+
 my $avgTime = $sum/$countAA;
 print "Average time for peptide to stay closer to start conformation = $avgTime\n";
 
@@ -126,8 +147,9 @@ sub getSScount
     my @ss = split ("", $simulationSS);
     if ( $start eq "coil")
     {
-        map { if ( ( $_ eq "~" ) or ( $_ eq "S")or ($_ eq "C")
-                       or ($_ eq "T") or ($_ eq "") )
+        map { if ( ( $_ eq "~" ) or ( $_ eq "-")or ($_ eq "")
+                       or ($_ eq "S") or ($_ eq "s") or
+                           ($_ eq "T") or ($_ eq "t") )
                   {
                       $coilCount++;
                   }
@@ -140,7 +162,8 @@ sub getSScount
     }
     elsif ( $start eq "strand")
     {
-        map{ if ( ( $_ eq "B" ) or ( $_ eq "E") )
+        map{ if ( ( $_ eq "B" ) or ( $_ eq "b") or
+                      ( $_ eq "E" ) or ( $_ eq "e") )
                  {
                      $strandCount++;
                  }
@@ -151,7 +174,8 @@ sub getSScount
     }
     elsif ( $start eq "helix")
     {
-        map{ if ( ( $_ eq "H") or ($_ eq "G") or ($_ eq "I") )
+        map{ if ( ( $_ eq "H") or ($_ eq "h") or ($_ eq "G") or
+              ( $_ eq "g") or ($_ eq "I") or ($_ eq "i") )
                  { 
                      $alphaCount++;
                  }
@@ -176,7 +200,8 @@ sub UsageDie
 
 
 getTimePercentageOfSS V1.0 (c) 2015, UCL, Saba Ferdous
-Usage:  getTimePercentageOfSS.pl -n <step size in ps> -l <simulation length in ps>
+Usage:  getTimePercentageOfSS.pl -n <step size in ps> -ls <simulation length in ps>
+        -s <start position> -lp <length of peptide>
         -f <dsspOutputFile.xpm>
 
 Finds the pecentage of time a residue stays in a parti-

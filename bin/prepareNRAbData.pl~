@@ -1,0 +1,19 @@
+use strict;
+use warnings;
+
+my $infile = $ARGV[0]; # List of redundant clusters
+#my $outputDir = $ARGV[1]; # Directory to store non-redundant data
+
+open(my $IN, $infile) or die "Can not open $!\n";
+
+my @nrFiles;
+
+while ( (<$IN>)
+    {
+        my ($firstElemInCluster) = split(',', $_);
+        chomp $firstElemInCluster;
+
+        my $firstElemPDBfile =  $firstElemInCluster.".pdb";
+        push (@nrFiles, $firstElemPDBfile);
+    }) {
+}

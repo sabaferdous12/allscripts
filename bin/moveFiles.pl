@@ -18,12 +18,13 @@ my @nr_files = <$in_file>;
 #exit;
 foreach my $nr_file (@nr_files){
     chomp $nr_file;
-    if (-e $nr_file){    
+    
+    if (-e $nr_file) {    
 	move ($nr_file, $destDir);
     }
 
     else{
-	print $nr_file, "\n";
+	print "$nr_file does not exist\n";
     }
 
 }

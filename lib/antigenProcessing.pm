@@ -14,7 +14,7 @@ sub getAntigenChains
 
     # Grep all antigen chain in PDB file
     @antigenChainsTemp = `grep "CHAIN A" $pdbFile`;
-
+        
     # For multiple antigens in PDB file
     if ( (scalar @antigenChainsTemp) > 1  )
     {

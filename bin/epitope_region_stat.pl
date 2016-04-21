@@ -18,7 +18,7 @@ use Antigen_Contacts qw
      antigen_cont_residue
      output_File_name
      get_hash_key
-     get_fragments
+     getregionsAndfragments
      get_regions_and_oddbits
 );
 use general qw (readDirPDB);
@@ -48,7 +48,8 @@ print {$EPITOPE_REGIONS} "Antibody:Regions:Fragments\n";
 
 foreach my $pdb_file (@dir_files) 
 {
-
+    print "TEST: $pdb_file\n";
+    
     # if there are no contacts on any one of antibody chain (light or heavy)
     # then do not check antigen for epitopes - exclude non-antigens
     my ($light_cont_res_REFA, $heavy_cont_res_REFA, $light_chain_conts_REFH,
@@ -64,12 +65,12 @@ foreach my $pdb_file (@dir_files)
     }
     
     else {
-        my ($antigen_chain_label, $antigen_resi, $antigen_chain_conts)
+        my ($antigen_chain_label, $antigen_resi, $antigen_chain_conts, $antigen_Chains_HREF)
             = antigen_cont_residue($pdb_file);
         
         my @antigen_reseq = get_hash_key($antigen_chain_conts);
-	
-        my @fragments = get_fragments(\@antigen_reseq, $gap);
+        	
+        my @fragments = getregionsAndfragments(\@antigen_reseq, $gap, $antigen_Chains_HREF);
  
         my ($regions, $odds, $count_regions, $count_odd_bits)
             = get_regions_and_oddbits( $contacting_residues, @fragments);
@@ -80,7 +81,7 @@ foreach my $pdb_file (@dir_files)
 	
     }
     
-     
+#    last; 
 }
 
 

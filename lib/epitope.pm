@@ -220,7 +220,7 @@ sub getDistanceToStraightLine
 	my ($startRes, $endRes) = ($record->[0], $record->[1]);
 	# Secondary structure assignment to each region
 	@epitopeSS = SecondaryStrAssignmentToPeptides 
-	    ($pdbFile, $antigenChainLabel, $startRes, $endRes, $count);
+	    ($pdbFile, $startRes, $endRes, $count);
 	
 	print {$SUMRY} "Secondry sturcture of region\n";
 	print {$SUMRY} "@epitopeSS\n";
@@ -228,7 +228,7 @@ sub getDistanceToStraightLine
 
 	# Obtains CA atom records for each region
 	@coordsCA = getCACoordsForRegion
-	    ($PDBAllCoordsRef, $antigenChainLabel, $startRes, $endRes);
+	    ($PDBAllCoordsRef, $startRes, $endRes);
 	my $sizePep =  scalar @coordsCA;
 	print {$SUMRY} "Size of peptide = $sizePep\n";
         print {$REGLEN} "$sizePep ";
@@ -241,8 +241,7 @@ sub getDistanceToStraightLine
 	    $endRes.$pdbFileName.".pdb";
 
 	# Get Best Fit line for the peptide of given range
-	getBestFitLine($startRes, $endRes, $antigenChainLabel,
-		       $pdbFile, $regressionOF); 
+	getBestFitLine($startRes, $endRes, $pdbFile, $regressionOF); 
 	print {$SUMRY} "Best fit line in the region is obtained\n";
 	
 	# Making figure of region with line of best fit in pymol 
@@ -607,12 +606,11 @@ sub classifyShape
 
 sub getBestFitLine
 {
-    my ($startRes, $endRes, $antigenChainLabel,
-        $pdbFile, $regressionOF) = @_;
+    my ($startRes, $endRes, $pdbFile, $regressionOF) = @_;
     my $pdbline = $SFPerlVars::pdbline;
     
-    my $startRes = $antigenChainLabel.".".$startRes; # e.g: A23               
-    my $endRes = $antigenChainLabel.".".$endRes; # e.g: A28                   
+#    my $startRes = $antigenChainLabel.".".$startRes; # e.g: A23               
+ #   my $endRes = $antigenChainLabel.".".$endRes; # e.g: A28                   
     
     # Using program pdbline to obtain line of best fit for each region        
     `$pdbline -r LIN -a O $startRes $endRes ../$pdbFile $regressionOF`;
@@ -669,7 +667,7 @@ sub getChainLabelAndType
 
 sub getCACoordsForRegion
 {
-    my ($PDBAllCoordsRef, $antigenChainLabel, $startRes, $endRes) = @_;
+    my ($PDBAllCoordsRef, $startRes, $endRes) = @_;
     my (%parsedPDB, @CACoords, $coords, $x, $y, $z);
  
    # map function works like a foreach loop and returns an array
@@ -677,8 +675,8 @@ sub getCACoordsForRegion
     # each line from $PDBAllCoordsRef is returned as a hash reference and 
     # @atomHrefs contains references of each hash 
 
-    my $startResID = $antigenChainLabel . $startRes;
-    my $endResID   = $antigenChainLabel . $endRes;
+#    my $startResID = $antigenChainLabel . $startRes;
+ #   my $endResID   = $antigenChainLabel . $endRes;
 
    # print "DEBUGG: $startResID\n";
   #  print "DEBUGG: $endResID\n";
@@ -689,8 +687,8 @@ sub getCACoordsForRegion
 #    print "resid " . $_->{resID} . " index " . $_->{residueIndex} . "\n"
 #	foreach @atomHrefs;
    #exit; 
-    my $startIndex = findResidueIndexForResID($startResID, @atomHrefs);
-    my $endIndex   = findResidueIndexForResID($endResID, @atomHrefs);
+    my $startIndex = findResidueIndexForResID($startRes, @atomHrefs);
+    my $endIndex   = findResidueIndexForResID($endRes, @atomHrefs);
     #print "DEBUGG: $startIndex\n";
     #print "DEBUGG: $endIndex\n";
     #exit; 
@@ -887,8 +885,7 @@ __EOF
 
 sub SecondaryStrAssignmentToPeptides
 {
-    my ($pdbFile, $antigenChainLabel, 
-	$startRes, $endRes, $count) = @_;
+    my ($pdbFile, $startRes, $endRes, $count) = @_;
     my ($pdbID, $ext1, @epitopeSS, $ext);
     # Open Output file
     open (my $SS, ">EpitopeSS$count.txt") or
@@ -903,18 +900,17 @@ sub SecondaryStrAssignmentToPeptides
   #  $antigenChainLabel = uc($antigenChainLabel);
 
     my $pdbFilePath = "/acrm/data/pdb/pdb";
-    
     $ext = ".ent"; 
     
     ($pdbID, $ext1) = split('_',  $pdbFile);
     $pdbFile = $pdbFilePath.lc($pdbID).$ext;
-    $antigenChainLabel = uc($antigenChainLabel);
 
+    #* $antigenChainLabel = uc($antigenChainLabel);
+    my $antigenChainLabel = substr ($startRes, 0, 1);
+    
     
     
     # Parse Secondary structure assignments of only Antigen chain
-#   my @antigen =
-#	`$xmastoss $pdbFile | grep $antigenChainLabel` ;
 
     my @antigen = `pdbsecstr $pdbFile | grep $antigenChainLabel`;
 
@@ -929,7 +925,7 @@ sub SecondaryStrAssignmentToPeptides
 	{
 	    last;
 	}
-	if ($line =~ m/$antigenChainLabel$startRes\s+/g)
+	if ($line =~ m/$startRes\s+/g)
 	{
 	    $insection = 1; 
 	}
@@ -938,7 +934,7 @@ sub SecondaryStrAssignmentToPeptides
 	    push (@epitopeSS, $line);
 	    print {$SS} $line, "\n"; # Writes on file
 	}
-	if ($line =~ m/$antigenChainLabel$endRes\s+/g)
+	if ($line =~ m/$endRes\s+/g)
 	{
 	    $endsection=1;
 	}

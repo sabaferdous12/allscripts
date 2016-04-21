@@ -10,6 +10,8 @@ use Data::Dumper;
 use SFPerlVars;
 #use Math::Vector::Real;
 use Math::Vec qw(NewVec);
+use antigenProcessing qw (getAntigenChains);
+
 #use lib("~/allscript/lib");
 use Cwd;
 
@@ -102,9 +104,10 @@ foreach my $pdbFile (@dirFiles)
 
 	chomp (my @dataArray = <$COMPLEX>);
 
-	my ($antigen_chain_label, $antigen_chain_type) =
-	    getChainLabelAndType($pdb_file);
-
+#	my ($antigen_chain_label, $antigen_chain_type) =
+#	    getChainLabelAndType($pdb_file);
+        my @antigenChains = getAntigenChains($pdb_file);
+        
 	 
 	    # Making directory
 	    my ($pdb, $ext) = split('\.', $pdb_file);
@@ -135,7 +138,7 @@ foreach my $pdbFile (@dirFiles)
 	    # To make pymol figure of antigen with highlighted regions in red 
 	    # and fragments in green 
 	writepymolScript(\@rangeRegion, \@residueFragment,
-                             $antigen_chain_label, $aligned_pdb, $pdb_file);
+                             \@antigenChains, $aligned_pdb, $pdb_file);
 	    
 	    # The array of arrays containing distances to straight line for
             # all epitopic regions in one antibody 

@@ -10,6 +10,8 @@ use Data::Dumper;
 use SFPerlVars;
 use epitope qw(getRegionRange getFragmentResidue writepymolScript );
 use general qw (readDirPDB);
+use antigenProcessing qw (getAntigenChains);
+
 use Cwd;
  
 my @antigen_DNA;
@@ -50,7 +52,7 @@ my @epitopeSequenceFile = <$EPITOPE>;
 foreach my $pdbFile (@dirFiles)
 {
     chomp $pdbFile; 
-
+    print "Processing... $pdbFile\n";
     my $epitopeInfo; 
     # Looking for Epitope Sequence in the file
     foreach my $epitope (@epitopeSequenceFile)
@@ -79,11 +81,12 @@ foreach my $pdbFile (@dirFiles)
 	
 	my $chaintype = $SFPerlVars::chaintype;
         # To obtain the antigen chain label and chain type (N Protein)
-	($antigen_chain_label, $antigen_chian_type) = 
-	    split(" ", `$chaintype $pdb_file | tail -1`);
-
+#	($antigen_chain_label, $antigen_chian_type) = 
+#	    split(" ", `$chaintype $pdb_file | tail -1`);
+        my @antigenChains = getAntigenChains($pdb_file);
+                
         #### get Antigen length
-        getAntigenChainLength($pdb_file, $antigen_chain_label, $AGPEP, $AGPRO, $AGPP, $AGPR);
+        #getAntigenChainLength($pdb_file, $antigen_chain_label, $AGPEP, $AGPRO, $AGPP, $AGPR);
                 
         # To align the antibody structure around a center
 	my $abalign = $SFPerlVars::abalign;
@@ -95,7 +98,7 @@ foreach my $pdbFile (@dirFiles)
 
         
 	    writepymolScript(\@rangeRegion, \@residueFragment, 
-			     $antigen_chain_label, $aligned_pdb, $pdb_file);
+			     \@antigenChains, $aligned_pdb, $pdb_file);
         
     }
      

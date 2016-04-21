@@ -100,6 +100,7 @@ sub writepymolScript
     my ($rangeRegionRef, $residueFragmentRef, 
 	$antigenChainLabel, $alignedPdb, $pdbFile) = @_;
     my $pdbFileName = basename($pdbFile, ".pdb"); 
+    my @antigenChains = @{$antigenChainLabel};
     
     # Writing pymol script to provide as input to pymol program
     open (my $PYMOL, '>', "pymolscript.pml") or die
@@ -117,20 +118,41 @@ hide lines
 select light, chain L                                         
 remove light                                                  
 select heavy, chain H                                         
-remove heavy                                                  
-color cyan, chain $antigenChainLabel
+remove heavy
 __EOF
+    my $count = 1;
+    foreach my $agChain (@antigenChains) {
+        chomp $agChain;
+        if ( ( $agChain eq "L") or ( $agChain eq "H") ) {
+            $agChain = $count;
+            print {$PYMOL} "color cyan, chain $agChain\n";
+            $count++;
+        }
+        else {
+            print {$PYMOL} "color cyan, chain $agChain\n";
 
+        }
+    }
+    
+    
 # Select the given epitope range and color that in red
 foreach my $record (@{$rangeRegionRef})
 {
     my $chainLabel = substr ($record->[0], 0, 1); # Obtaining first character
     my $start = substr ($record->[0], 1); # Obtaining RESEQ - start
     my $end = substr ($record->[1], 1); # Obtaining RESEQ - end
-    
-    # Accessing elements from anonymous array
-    print {$PYMOL} "select regions, resi $start-$end and chain $chainLabel\n";
-    print {$PYMOL} "color red, regions\n";
+    my $count = 1;
+    if ( ( $chainLabel eq "L") or ( $chainLabel eq "H") ) {
+        $chainLabel = $count;
+        print {$PYMOL} "select regions, resi $start-$end and chain $chainLabel\n";
+        print {$PYMOL} "color red, regions\n";
+        $count++;
+    }
+    else {
+        print {$PYMOL} "select regions, resi $start-$end and chain $chainLabel\n";
+        print {$PYMOL} "color red, regions\n";
+    }
+
 }
 
 # Select and color the fragment residues
@@ -138,11 +160,19 @@ foreach my $record (@{$residueFragmentRef})
 {
     my $chainLabel = substr ($record, 0, 1); # Obtaining first character
     my $start = substr ($record, 1);
-    
-    print {$PYMOL} "select fragments, resi $start and chain $chainLabel\n";
-    print {$PYMOL} "color green, fragments\n";
-}
-    
+
+    my $count = 1;
+        if ( ( $chainLabel eq "L") or ( $chainLabel eq "H") ) {
+        $chainLabel = $count;
+        print {$PYMOL} "select fragments, resi $start and chain $chainLabel\n";
+        print {$PYMOL} "color green, fragments\n";
+        $count++;
+    }
+    else {
+        print {$PYMOL} "select fragments, resi $start and chain $chainLabel\n";
+        print {$PYMOL} "color green, fragments\n";
+    }
+}    
 # Taking the image
 print {$PYMOL} "ray 800,600\n";
 print {$PYMOL} "png $pdbFileName.png\n";
@@ -150,7 +180,7 @@ print {$PYMOL} "quit\n";
 
 # Sending pymol script to program pymol
 `$pymol -c pymolscript.pml`;
-#unlink "pymolscript.pml";
+unlink "pymolscript.pml";
 unlink $alignedPdb;
     
 }

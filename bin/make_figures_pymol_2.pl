@@ -80,7 +80,7 @@ foreach my $pdbFile (@dirFiles)
 	my $chaintype = $SFPerlVars::chaintype;
         # To obtain the antigen chain label and chain type (N Protein)
 	($antigen_chain_label, $antigen_chian_type) = 
-	    split(" ", `$chaintype $pdb_file | head -1`);
+	    split(" ", `$chaintype $pdb_file | tail -1`);
 
         #### get Antigen length
         getAntigenChainLength($pdb_file, $antigen_chain_label, $AGPEP, $AGPRO, $AGPP, $AGPR);
@@ -92,10 +92,11 @@ foreach my $pdbFile (@dirFiles)
 	
 	@rangeRegion = getRegionRange($regions);
 	@residueFragment = getFragmentResidue($fragments);
-	
+
+        
 	    writepymolScript(\@rangeRegion, \@residueFragment, 
 			     $antigen_chain_label, $aligned_pdb, $pdb_file);
-	
+        
     }
      
 

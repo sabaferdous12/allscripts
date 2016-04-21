@@ -48,7 +48,7 @@ print {$EPITOPE_REGIONS} "Antibody:Regions:Fragments\n";
 
 foreach my $pdb_file (@dir_files) 
 {
-    print "TEST: $pdb_file\n";
+    print "Processing... $pdb_file\n";
     
     # if there are no contacts on any one of antibody chain (light or heavy)
     # then do not check antigen for epitopes - exclude non-antigens

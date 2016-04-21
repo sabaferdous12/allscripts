@@ -123,16 +123,23 @@ __EOF
 
 # Select the given epitope range and color that in red
 foreach my $record (@{$rangeRegionRef})
-{ 
+{
+    my $chainLabel = substr ($record->[0], 0, 1); # Obtaining first character
+    my $start = substr ($record->[0], 1); # Obtaining RESEQ - start
+    my $end = substr ($record->[1], 1); # Obtaining RESEQ - end
+    
     # Accessing elements from anonymous array
-    print {$PYMOL} "select regions, resi $record->[0]-$record->[1]\n";
+    print {$PYMOL} "select regions, resi $start-$end and chain $chainLabel\n";
     print {$PYMOL} "color red, regions\n";
 }
 
 # Select and color the fragment residues
 foreach my $record (@{$residueFragmentRef})
 {
-    print {$PYMOL} "select fragments, resi $record\n";
+    my $chainLabel = substr ($record, 0, 1); # Obtaining first character
+    my $start = substr ($record, 1);
+    
+    print {$PYMOL} "select fragments, resi $start and chain $chainLabel\n";
     print {$PYMOL} "color green, fragments\n";
 }
     
@@ -143,7 +150,7 @@ print {$PYMOL} "quit\n";
 
 # Sending pymol script to program pymol
 `$pymol -c pymolscript.pml`;
-unlink "pymolscript.pml";
+#unlink "pymolscript.pml";
 unlink $alignedPdb;
     
 }

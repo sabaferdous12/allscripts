@@ -8,17 +8,45 @@ use strict;
  
 use Exporter qw(import);
 my $pymol = "/usr/bin/pymol"; 
-our @EXPORT_OK = qw(getRegionRange getFragmentResidue writepymolScript 
-getDistanceToStraightLine getChainLabelAndType getCACoordsForRegion getXYZ
-calculateDistanceWithLine getBestFitLineCoords makePeptideFigure
-SecondaryStrAssignmentToPeptides printArrays getLeastDistanceCAlpha 
-getEuclideanDistance SumOfDistance getSide getPointfromDistance 
-getPercentAlpha makePeptideFigure getVectors getVectorAngle
-getVecPointByArrayofPoints getMidPoints absoluteDistancePoints
-getLeastDistanceCAlpha getNearestCAToMidPoint getSecondclosestpoint 
-getSide getPointfromDistance getReferencepoints getAllCADistanceWithLine
-getPointsForCAonLine getPointToPointDistanceOnLine averageDeviation 
-reverseRegLineDir checkDeviationOnEnds getResDist getResSeq getContacts);
+our @EXPORT_OK = qw (
+                        getRegionRange
+                        getFragmentResidue
+                        writepymolScript 
+                        getDistanceToStraightLine
+                        getChainLabelAndType
+                        getCACoordsForRegion
+                        getXYZ
+                        calculateDistanceWithLine
+                        getBestFitLineCoords
+                        makePeptideFigure
+                        SecondaryStrAssignmentToPeptides
+                        printArrays
+                        getLeastDistanceCAlpha 
+                        getEuclideanDistance
+                        SumOfDistance
+                        getSide
+                        getPointfromDistance 
+                        getPercentAlpha
+                        makePeptideFigure
+                        getVectors
+                        getVectorAngle
+                        getVecPointByArrayofPoints
+                        getMidPoints
+                        absoluteDistancePoints
+                        getLeastDistanceCAlpha
+                        getNearestCAToMidPoint
+                        getSecondclosestpoint 
+                        getReferencepoints
+                        getAllCADistanceWithLine
+                        getPointsForCAonLine
+                        getPointToPointDistanceOnLine
+                        averageDeviation 
+                        reverseRegLineDir
+                        checkDeviationOnEnds
+                        getResDist
+                        getResSeq
+                        getContacts
+                );
 use Math::Vec qw(NewVec);
 use SFPerlVars;
 use List::Util qw(reduce);
@@ -224,8 +252,8 @@ sub getDistanceToStraightLine
 	
 	print {$SUMRY} "Secondry sturcture of region\n";
 	print {$SUMRY} "@epitopeSS\n";
-	
-
+	        
+        
 	# Obtains CA atom records for each region
 	@coordsCA = getCACoordsForRegion
 	    ($PDBAllCoordsRef, $startRes, $endRes);
@@ -689,12 +717,14 @@ sub getCACoordsForRegion
    #exit; 
     my $startIndex = findResidueIndexForResID($startRes, @atomHrefs);
     my $endIndex   = findResidueIndexForResID($endRes, @atomHrefs);
-    #print "DEBUGG: $startIndex\n";
-    #print "DEBUGG: $endIndex\n";
+    print "DEBUGG: $startIndex\n";
+    print "DEBUGG: $endIndex\n";
     #exit; 
     my @regionCAHrefs = 
 	map {[$_->{x}, $_->{y}, $_->{z}]} 
     grep { isCAInRange($_, $startIndex, $endIndex) } @atomHrefs;
+
+    print "HHHHHHHHHH:", Dumper (\@regionCAHrefs );
     
     return @regionCAHrefs;  
 }

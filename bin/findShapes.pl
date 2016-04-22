@@ -8,25 +8,29 @@ use strict;
 
 use Data::Dumper;
 use SFPerlVars;
-#use Math::Vector::Real;
 use Math::Vec qw(NewVec);
 use antigenProcessing qw (getAntigenChains);
-
-#use lib("~/allscript/lib");
-use Cwd;
-
-use epitope qw(getRegionRange getFragmentResidue writepymolScript
-getDistanceToStraightLine getChainLabelAndType getCACoordsForRegion getXYZ
-calculateDistanceWithLine getBestFitLineCoords makePeptideFigure printArrays
-getLeastDistanceCAlpha);
 use general qw(readDirPDB);
 use File::Basename;
+use Cwd;
+
+use epitope qw (
+                  getRegionRange
+                  getFragmentResidue
+                  writepymolScript
+                  getDistanceToStraightLine
+                  getChainLabelAndType
+                  getCACoordsForRegion
+                  getXYZ
+                  calculateDistanceWithLine
+                  getBestFitLineCoords
+                  makePeptideFigure
+                  printArrays
+                  getLeastDistanceCAlpha
+           );
 
 my $pymol = "/usr/bin/pymol";
 
-
-#my $dir = "/home/bsm/ucbterd/Desktop/EpitopeShape/A_Epitope_Shape/lib/myTestData/AlphaPartialLoop";
-#my $dir = "/acrm/data/people/saba/data/dataNew/DataMay2015/NR_Complex_Martin/ProteinAntigen"; 
 my $dir = getcwd();
 
 `mkdir -p $dir/LINEAR`;
@@ -35,7 +39,7 @@ my $dir = getcwd();
 chdir $dir;
 my $infile = "epitope_sequence-G3-CR3";
 
-my @dirFiles = readDirPDB ($dir);
+my @dirFiles = readDirPDB ($dir); # Reading all PDB complexes in an array
 my $EPITOPE;
 
 my $pdb;
@@ -60,7 +64,6 @@ foreach my $pdbFile (@dirFiles)
 {
 
 ############
-   # my $pdb;
     my @antigen_DNA;
     my @antigen_protein;
     my %parsedData;
@@ -68,7 +71,6 @@ foreach my $pdbFile (@dirFiles)
     my @AlldistToLine;
     my @distToLine;
     my $antigen_chain_label;
-   # my %distances;
     my $aligned_pdb ;
     my ($antigen_chain_label, $antigen_chian_type);
     my (@rangeRegion, @residueFragment) = ();
@@ -76,8 +78,8 @@ foreach my $pdbFile (@dirFiles)
 
     chomp $pdbFile;
     my $epitopeInfo;
+
     # Looking for Epitope Sequence in the file                                
-                        
     foreach my $epitope (@epitopeSequenceFile)
     {
         chomp $epitope;
@@ -98,36 +100,33 @@ foreach my $pdbFile (@dirFiles)
 
     else
     {
-	print $pdb_file, "\n";
+	print "Processing ... $pdb_file\n";
         open (my $COMPLEX, $pdb_file) or die
             "Can not open $pdb_file"; # open PDB file                        
-
 	chomp (my @dataArray = <$COMPLEX>);
 
-#	my ($antigen_chain_label, $antigen_chain_type) =
-#	    getChainLabelAndType($pdb_file);
+        # Obtaining original antigen chain labels from processed PDB header
         my @antigenChains = getAntigenChains($pdb_file);
-        
-	 
-	    # Making directory
-	    my ($pdb, $ext) = split('\.', $pdb_file);
-	    mkdir $pdb;
-	    chdir $pdb;
 
-	    ###############
+        # Making directory
+        my ($pdb, $ext) = split('\.', $pdb_file);
+        mkdir $pdb;
+        chdir $pdb;
+        
+        ###############
 	my $pdbFileName = basename($pdbFile, ".pdb");
 	open (my $SUMRY, '>', $pdbFileName."_Summary.log") or 
 	    die "can not open file $!";
- 
-	    `mv ../AllDistances.txt ./`; 
+        
+        `mv ../AllDistances.txt ./`; 
 	
-	    # To align the antibody structure around a center                 
-            my $abalign = $SFPerlVars::abalign;
-            $aligned_pdb = "aligned_".$pdb_file;
-            `$abalign -k ../$pdb_file $aligned_pdb`;
+        # To align the antibody structure around a center                 
+        my $abalign = $SFPerlVars::abalign;
+        $aligned_pdb = "aligned_".$pdb_file;
+        `$abalign -k ../$pdb_file $aligned_pdb`;
 
-
-	    # To obtain the range on each epitopic region i.e, start and end  
+        
+        # To obtain the range on each epitopic region i.e, start and end  
 	@rangeRegion = getRegionRange($regions);
    	print {$SUMRY} Dumper (\@rangeRegion); 	
 
@@ -135,13 +134,13 @@ foreach my $pdbFile (@dirFiles)
 	@residueFragment = getFragmentResidue($fragments);	    
 	print {$SUMRY} Dumper (\@residueFragment);
 
-	    # To make pymol figure of antigen with highlighted regions in red 
-	    # and fragments in green 
+        # To make pymol figure of antigen with highlighted regions in red 
+        # and fragments in green 
 	writepymolScript(\@rangeRegion, \@residueFragment,
-                             \@antigenChains, $aligned_pdb, $pdb_file);
-	    
-	    # The array of arrays containing distances to straight line for
-            # all epitopic regions in one antibody 
+                         \@antigenChains, $aligned_pdb, $pdb_file);
+        
+        # The array of arrays containing distances to straight line for
+        # all epitopic regions in one antibody 
 	my ($epitopeSSRef, $deviationsRef) = getDistanceToStraightLine 
 	    (\@rangeRegion, \@dataArray, $antigen_chain_label, $pdb_file, $SUMRY, $dir, $REGLEN,
              $CURVEDLEN, $LINEARLEN, $FOLDEDLEN, $SSINFO);

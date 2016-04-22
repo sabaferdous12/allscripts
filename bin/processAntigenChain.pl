@@ -75,11 +75,13 @@ foreach my $pdbFile (@dirFiles)
     
     # Write antibody chains in this file
     while ( my $line = <$IN>) {
-        if ( ( $line =~ m/^REMARK/) or ( ( $line =~ /\s+L\s+/) and ($line =~/^ATOM|^TER/) )
-                 or ( ( $line =~ /\s+H\s+/) and ($line =~/^ATOM|^TER/) ) ) {
+        
+        if ( ( $line =~ m/^REMARK/) or ( ( substr ($line, 21, 1) eq "L") and ($line =~/^ATOM|^TER/) )
+                 or ( ( substr ($line, 21, 1) eq "H") and ($line =~/^ATOM|^TER/) ) ) {
             print {$ABTMP} $line;
         }
     }
+    
     #close $ABTMP;
     
     # obtaining orignal antigen chain from local PDB file
@@ -130,9 +132,11 @@ foreach my $pdbFile (@dirFiles)
     close $AB;
     close $IN;
     `unlink $abFileTemp`;
-  #  `unlink $antigen`;
+    `unlink $antigen`;
+#    last;
+    
 }
-`unlink tempAg.pdb`;
+#`unlink tempAg.pdb`;
 
 `mv *pro^* processed`;
 

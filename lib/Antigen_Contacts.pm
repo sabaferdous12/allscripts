@@ -410,7 +410,8 @@ sub get_regions_and_oddbits{
        # To sort the numeric and alpha numeric values of array @fragment
 #       @fragment = sort { $a <=> $b || $a cmp $b } @fragment;
        @fragment =
-           sort { substr($a, 0, 1) cmp substr($b, 0, 1) || substr($a, 1) <=> substr($b, 1) } @fragment;
+           sort { substr($a, 0, 1) cmp substr($b, 0, 1) ||
+                      ( (substr($a, 1) <=> substr($b, 1)) || (substr($a, 1) cmp substr($b, 1) ) ) } @fragment;
        
 	 if (@$fragment>= $contacting_residues) 
 	{

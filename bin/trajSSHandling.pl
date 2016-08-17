@@ -70,7 +70,9 @@ foreach my $pdb ( @PDBfiles)
 {
     chomp $pdb;
     print "Calculationg Secondary Structure for frame $count\n";
-    `pdbsecstr -s $pdb | awk '{""; print \$3}' >$name.$count".ss"`;
+#    `pdbsecstr -s $pdb | awk '{""; print \$3}' >$name.$count".ss"`;
+    `pdbsecstr $pdb | awk '{""; print \$3}' >$name.$count".ss"`;
+    
     $count++;
 }
 

@@ -1,0 +1,12 @@
+use strict;
+use warnings;
+
+
+use general qw (readDirPDB);
+my $inputFile = $ARGV[0];
+
+my @PDBCodes = readFileDataInArray($inputFile);
+
+foreach my $pdb(@PDBCodes ) {
+    print "$pdb\n";
+}

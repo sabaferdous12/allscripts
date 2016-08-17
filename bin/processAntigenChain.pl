@@ -49,7 +49,7 @@ my @dirFiles = readDirPDB($dir);
  
 my @antigenPDB;
 my $flag = 0;
-`mkdir -p processed`;
+`mkdir -p processedAntigen`;
 
 foreach my $pdbFile (@dirFiles)
 {
@@ -92,6 +92,8 @@ foreach my $pdbFile (@dirFiles)
         open (my $AG, '>', $antigen) or die "Error....\n";
         
         @antigenPDB = `pdbatoms $pdbPath | pdbgetchain $ag`;
+       
+        
         # If antigen chain has L or H chain label then rename it as A
         if ( ( $ag eq "L" ) or ($ag eq "H") ) {
             map { if ( $_ =~ /\s+$ag\s+/)  {print {$AG} $_;}} @antigenPDB;
@@ -119,7 +121,7 @@ foreach my $pdbFile (@dirFiles)
             # print all lines except master and END record
         #    map { if ($_ !~ /MASTER|END|HOH/)  {print {$ABTMP} $_;}} @antigenPDB;
             open (my $AG2, '>', $ag.".pdb") or die "Error....\n";
-            map { if ( $_ =~ /\s+$ag\s+/)  {print {$AG2} $_;}} @antigenPDB;
+            map { if ( $_ =~ /\s+$ag\s*/)  {print {$AG2} $_;}} @antigenPDB;
             `cat $ag.pdb >>$abFileTemp`;
             `unlink $ag.pdb`;
        
@@ -138,7 +140,7 @@ foreach my $pdbFile (@dirFiles)
 }
 #`unlink tempAg.pdb`;
 
-`mv *pro^* processed`;
+`mv *pro^* processedAntigen`;
 
 # All the new files now have extension pro^:
 # To remove that and restore original name, run the following bash command

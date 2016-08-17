@@ -27,6 +27,7 @@ my @regionFragmentCount = ();
 # Loop goes upto the maximum regions
 
 my @region = qw (
+4
 5
 6
 7
@@ -66,10 +67,10 @@ my @region = qw (
 41
 42
 43
-44
 45
 46
 47
+50
 51
 80
 );
@@ -94,7 +95,7 @@ my @frags = qw (0
 );
 
 
-for (my $i = 0; $i < 45; $i++)
+for (my $i = 0; $i < 46; $i++)
 #foreach my $f (@frags)
 {
     @regionFragmentCount = (); # Resetting the array
@@ -109,7 +110,7 @@ for (my $i = 0; $i < 45; $i++)
 	    chomp $epitope;
 	      # Split the data line on colon
             my ($pdbID, $regions, $fragments) =
-		    split(/\s+/, $epitope);
+		    split(/:/, $epitope);
 #		print "SSSS: :::: $pdbID: $regions: $fragments\n";		
 
 		    if (($regions == $region[$i]) and ($fragments == $frags[$j])) 

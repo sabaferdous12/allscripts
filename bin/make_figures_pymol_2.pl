@@ -107,8 +107,8 @@ foreach my $pdbFile (@dirFiles)
 } # While Loop ends here
 
 # Directory Manipulation 
-`mkdir -p Figure`;
-`mv *.png ./Figure`;
+`mkdir -p FigureEpitopes`;
+`mv *.png ./FigureEpitopes`;
 
 print scalar @antigen_DNA, " DNA Antigens are:  @antigen_DNA\n";
 print scalar @antigen_protein, " Protein Antigens are: @antigen_protein\n";

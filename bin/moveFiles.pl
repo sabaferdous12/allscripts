@@ -13,7 +13,7 @@ open(my $in_file, $file) or die "Can not open\n";
 
 my @nr_files = <$in_file>;
 
-#print @nr_files;
+print @nr_files;
 
 #exit;
 foreach my $nr_file (@nr_files){

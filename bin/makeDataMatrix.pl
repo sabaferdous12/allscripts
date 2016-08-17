@@ -3,7 +3,7 @@
 # the number of fragments againt number of regions and stores results 
 # in a csv file as a matrix  
 use strict;
-use warnings; 
+#use warnings; 
 use Data::Dumper; 
 use Text::CSV; 
 #use Data::Dump qw (dump);
@@ -25,14 +25,14 @@ my @regionFragmentCount = ();
 # Loop throughs the regions 
 # Loop goes upto the maximum regions
 my @regions = qw (0 1 2 3 4 5 6 7 8 9);
-my @frags = qw (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14);
+my @frags = qw (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16);
 for (my $i = 0; $i < 10; $i++)
 {
     @regionFragmentCount = (); # Resetting the array
     
     # Loop throughs the fragments     
     # Loop goes upto the maximum fragments
-    for (my $j = 0; $j < 15; $j++)
+    for (my $j = 0; $j < 17; $j++)
     {
 	# Reads every line to count the number of regions against the number 
 	# of fragments and forms a array of arrays
@@ -41,15 +41,18 @@ for (my $i = 0; $i < 10; $i++)
 	  # Split the data line on colon
 	    my ($pdbID, $regions, $fragments) =
 	    split(":", $epitope);
-
+            #print "RE: $regions: FRA: $fragments\n";
+            
 	    if (($regions == $regions[$i]) and ($fragments == $frags[$j])) 
 	    {
+                next if ( ( $regions[$i] == 0) and ( $frags[$j] == 0) ); 
 		$count++; 
 	    }
 	}
 	push (@regionFragmentCount, $count);
 	$count = 0;
     }
+     
     # Constructing array of arrays
     push (@regionFragmentCount2d, [@regionFragmentCount]);
 }
@@ -57,7 +60,7 @@ for (my $i = 0; $i < 10; $i++)
 # For printing the array of arrays
 foreach my $regionFragmentCount (@regionFragmentCount2d)
 {
-    my @regionFragmentCount = @{$regionFragmentCount}; 
+    my @regionFragmentCount = @{$regionFragmentCount};
  #   print join (" ", @regionFragmentCount), "\n"; 
     $csv->print ($OUT, $regionFragmentCount);
     print $OUT "\n"; 

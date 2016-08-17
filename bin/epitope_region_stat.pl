@@ -55,16 +55,16 @@ foreach my $pdb_file (@dir_files)
     my ($light_cont_res_REFA, $heavy_cont_res_REFA, $light_chain_conts_REFH,
         $heavy_chain_conts_REFH) = antibody_cont_residue ($pdb_file);
 
-    
-    if ( (!@{$light_cont_res_REFA}) or (!@{$heavy_cont_res_REFA}) ) {
+  # QUIT 2 chain contacts condition  
+#    if ( (!@{$light_cont_res_REFA}) or (!@{$heavy_cont_res_REFA}) ) {
 #        print {$EPITOPE_REGIONS} "$pdb_file:Not Antigen\n";
 #        print {$STAT} "$pdb_file:Not Antigen\n";
-        print {$NONANTIGEN} "$pdb_file\n";
+#        print {$NONANTIGEN} "$pdb_file\n";
         
-        next;
-    }
+#        next;
+ #   }
     
-    else {
+#    else {
         my ($antigen_chain_label, $antigen_resi, $antigen_chain_conts, $antigen_Chains_HREF)
             = antigen_cont_residue($pdb_file);
         
@@ -79,7 +79,7 @@ foreach my $pdb_file (@dir_files)
         print {$EPITOPE_REGIONS} "$pdb_file:$regions:$odds\n";
         print {$STAT} "$pdb_file:$count_regions:$count_odd_bits\n";   
 	
-    }
+ #   }
     
 #    last; 
 }

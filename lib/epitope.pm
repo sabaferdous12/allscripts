@@ -246,10 +246,14 @@ sub getDistanceToStraightLine
 	print {$SUMRY} "region_".$count."\n";
 
 	my ($startRes, $endRes) = ($record->[0], $record->[1]);
+        
 	# Secondary structure assignment to each region
 	@epitopeSS = SecondaryStrAssignmentToPeptides 
 	    ($pdbFile, $startRes, $endRes, $count);
-	
+
+        my $antigenChainLabel = substr ($startRes, 0, 1);
+        
+        
 	print {$SUMRY} "Secondry sturcture of region\n";
 	print {$SUMRY} "@epitopeSS\n";
 	        
@@ -496,7 +500,7 @@ sub classifyShape
         }
 	
     }
-    elsif (($averageDeviation > 1.0) and ($averageDeviation < 2.5))
+    elsif (($averageDeviation > 1.0) and ($averageDeviation <= 2.5))
     {
 	if ($sizePep >= 6)
 	{
@@ -1836,11 +1840,13 @@ sub getContacts
     my $ncontacts = 0; 
     my $maxcontactsDistant = 0; 
     my $maxcontactsLocal = 0;
-    
+
+        
     # To check every residue
     my ($countLocal, $countDistant) = 0; 
     my $countL = 0; 
     my $countD = 0;
+
     for (my $n = 0; $n < $length; $n++)
     {
 	# The spacing to check the contacts
@@ -1875,6 +1881,7 @@ sub getContacts
 		    }
 		}
 	    }
+            
              # If the length of peptide is more than 12 then it should start 
              # from the spacing of 5 other wise half of length
 	    my $contactThershold;  
@@ -1900,7 +1907,9 @@ sub getContacts
 		   $maxcontactsDistant = $ncontacts;
 	       }
 	   }
+                
 	}
+        
 #	last; 
     }
     print "Local MaxCOntacts; ", $maxcontactsLocal, "\n";

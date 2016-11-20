@@ -76,8 +76,8 @@ while (my $line=<$IN>) # Reads file from STDIN
 
         # Checks the type of first frame's SS
         # checks for coil
-        if ( ( $start eq "h")
-                 or ( $start eq "") or ( $start eq "~") or ( $start eq "-") or 
+        if ( #( $start eq "h") or
+            ( $start eq "") or ( $start eq "~") or ( $start eq "-") or 
                  ( $start eq "C") or ( $start eq "c") or
                      ( $start eq "S") or ( $start eq "s" ) or
                          ( $start eq "T") or ( $start eq "t" ) )
@@ -98,8 +98,8 @@ while (my $line=<$IN>) # Reads file from STDIN
                 
             }
         # checks for helix
-        elsif ( ( $start eq "H") or
-                    ($start eq "G") or ( $start eq "g") or
+        elsif ( ( $start eq "H") or ( $start eq "h") or
+                    ($start eq "G") or ( $start eq "g") or 
                         ($start eq "I") or ( $start eq "i") )
             {
                 $startType = "helix";
@@ -149,7 +149,8 @@ sub getSScount
     my @ss = split ("", $simulationSS);
     if ( $start eq "coil")
     {
-        map { if ( ( $_ eq "~" ) or ( $_ eq "h" )  or ( $_ eq "-")or ($_ eq "")
+        map { if ( #( $_ eq "h" ) or
+            ( $_ eq "~" )  or ( $_ eq "-")or ($_ eq "")
                        or ($_ eq "S") or ($_ eq "s") or
                            ($_ eq "T") or ($_ eq "t") )
                   {
@@ -176,7 +177,7 @@ sub getSScount
     }
     elsif ( $start eq "helix")
     {
-        map{ if ( ( $_ eq "H")  or ($_ eq "G") or
+        map{ if ( ( $_ eq "H")  or ($_ eq "G") or ( $_ eq "h" ) or
               ( $_ eq "g") or ($_ eq "I") or ($_ eq "i") )
                  { 
                      $alphaCount++;

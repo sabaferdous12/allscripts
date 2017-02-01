@@ -38,6 +38,8 @@ use strict;
 #use warnings;
 use Data::Dumper;
 use Getopt::Long qw(GetOptions);
+use File::Basename;
+
 
 my $stepSize;
 my $simuLength;
@@ -55,7 +57,10 @@ GetOptions
 ) or UsageDie();
 
 open (my $IN, '<', $inputFile);
+my $outFile = basename($inputFile, ".dat");
 
+open (my $OUT, '>', $outFile.".ss");
+       
 my %resHash;
 my $count = 1;
 my @pepSeq;
@@ -201,13 +206,13 @@ my $countAA=0;
 for ( my $i = $startLoop; $i < $endLoop; $i++) {
     $sum = $sum + $perVal[$i];
     $countAA++;
-    print "$perKey[$i]: $perVal[$i]\n";
+    print {$OUT} "$perKey[$i]: $perVal[$i]\n";
 }
 
 #print "SUM=$sum\n";
 
 $avgTime= sprintf "%.2f", $sum/$countAA,"\n";
-print "Average time for peptide to stay closer to start conformation = $avgTime\n";
+print {$OUT} "Average time for peptide to stay closer to start conformation = $avgTime\n";
 
 
 

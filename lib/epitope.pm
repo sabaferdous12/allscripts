@@ -253,7 +253,6 @@ sub getDistanceToStraightLine
 
         my $antigenChainLabel = substr ($startRes, 0, 1);
         
-        
 	print {$SUMRY} "Secondry sturcture of region\n";
 	print {$SUMRY} "@epitopeSS\n";
 	        
@@ -398,7 +397,7 @@ sub getDistanceToStraightLine
 	print {$SUMRY} "Hash contaning all the CA actual points has been ".
 	    "obtained\n";
 	print {$SUMRY} Dumper (\%CApointsOnLine);
-	print {$SSINFO} "$pdbFile:";
+	print {$SSINFO} "$pdbFile:$sizePep:";
         # To map the deviation between ideal point and actual CA point
 	# RF-CA distance on line provides deviation
 	my @IdealActualDeviations = 
@@ -942,11 +941,9 @@ sub SecondaryStrAssignmentToPeptides
     #* $antigenChainLabel = uc($antigenChainLabel);
     my $antigenChainLabel = substr ($startRes, 0, 1);
     
-    
-    
     # Parse Secondary structure assignments of only Antigen chain
 
-    my @antigen = `pdbsecstr $pdbFile | grep $antigenChainLabel`;
+    my @antigen = `pdbsecstr $pdbFile | grep ^$antigenChainLabel`;
 
       
     my ($insection, $endsection) = 0; 

@@ -149,7 +149,7 @@ foreach my $pdbFile (@dirFiles)
 #	my @distancesCalphaToLineRef = @{$distancesCalphaToLine};
 	my @epitopeSS = @{$epitopeSSRef}; 
 		    
-	    # Print Array of SS and Distances
+	    # Print Array of SS and Distances4r
 	    printArrays (\@epitopeSS, $deviationsRef, $pdb_file, $ALL);
 
 	    # Hash of arrays to store regions corresponding to an antibody
